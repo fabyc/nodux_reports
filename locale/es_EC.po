@@ -10,7 +10,6 @@ msgctxt "field:account.cubo_venta,cajas:"
 msgid "Cajas"
 msgstr ""
 
-#, fuzzy
 msgctxt "field:account.cubo_venta,cantidad:"
 msgid "Cantidad"
 msgstr "Cantidad"
@@ -19,7 +18,6 @@ msgctxt "field:account.cubo_venta,categoria:"
 msgid "Categoria"
 msgstr ""
 
-#, fuzzy
 msgctxt "field:account.cubo_venta,cliente:"
 msgid "Cliente"
 msgstr "CLIENTE"
@@ -28,17 +26,14 @@ msgctxt "field:account.cubo_venta,costo_total:"
 msgid "Costo"
 msgstr ""
 
-#, fuzzy
 msgctxt "field:account.cubo_venta,country:"
 msgid "Country"
 msgstr "País"
 
-#, fuzzy
 msgctxt "field:account.cubo_venta,create_date:"
 msgid "Create Date"
 msgstr "Fecha de Creación"
 
-#, fuzzy
 msgctxt "field:account.cubo_venta,create_uid:"
 msgid "Create User"
 msgstr "Usuario creación"
@@ -51,7 +46,6 @@ msgctxt "field:account.cubo_venta,fecha_inicio:"
 msgid "Desde"
 msgstr ""
 
-#, fuzzy
 msgctxt "field:account.cubo_venta,id:"
 msgid "ID"
 msgstr "Identificador"
@@ -68,12 +62,10 @@ msgctxt "field:account.cubo_venta,marca:"
 msgid "Marca"
 msgstr ""
 
-#, fuzzy
 msgctxt "field:account.cubo_venta,rec_name:"
 msgid "Name"
 msgstr "Nombre"
 
-#, fuzzy
 msgctxt "field:account.cubo_venta,stock:"
 msgid "Stock"
 msgstr "Stock"
@@ -82,7 +74,6 @@ msgctxt "field:account.cubo_venta,tipo:"
 msgid "Tipo"
 msgstr ""
 
-#, fuzzy
 msgctxt "field:account.cubo_venta,total:"
 msgid "Total"
 msgstr "Total"
@@ -95,17 +86,14 @@ msgctxt "field:account.cubo_venta,vendedor:"
 msgid "Vendedor"
 msgstr ""
 
-#, fuzzy
 msgctxt "field:account.cubo_venta,write_date:"
 msgid "Write Date"
 msgstr "Modificado por usuario"
 
-#, fuzzy
 msgctxt "field:account.cubo_venta,write_uid:"
 msgid "Write User"
 msgstr "Usuario modificación"
 
-#, fuzzy
 msgctxt "field:account.cubo_venta,zona:"
 msgid "Subdivision"
 msgstr "Subdivisión"
@@ -114,7 +102,6 @@ msgctxt "field:account.cubo_venta_lineas,cajas:"
 msgid "Cajas"
 msgstr ""
 
-#, fuzzy
 msgctxt "field:account.cubo_venta_lineas,cantidad:"
 msgid "Cantidad"
 msgstr "Cantidad"
@@ -127,12 +114,10 @@ msgctxt "field:account.cubo_venta_lineas,costo_total:"
 msgid "Costo Total"
 msgstr ""
 
-#, fuzzy
 msgctxt "field:account.cubo_venta_lineas,create_date:"
 msgid "Create Date"
 msgstr "Fecha de Creación"
 
-#, fuzzy
 msgctxt "field:account.cubo_venta_lineas,create_uid:"
 msgid "Create User"
 msgstr "Usuario creación"
@@ -141,7 +126,6 @@ msgctxt "field:account.cubo_venta_lineas,cubo_ref:"
 msgid "Cubo"
 msgstr ""
 
-#, fuzzy
 msgctxt "field:account.cubo_venta_lineas,factura:"
 msgid "Factura"
 msgstr "Factura"
@@ -150,7 +134,6 @@ msgctxt "field:account.cubo_venta_lineas,fecha:"
 msgid "Fecha"
 msgstr ""
 
-#, fuzzy
 msgctxt "field:account.cubo_venta_lineas,id:"
 msgid "ID"
 msgstr "Identificador"
@@ -159,17 +142,14 @@ msgctxt "field:account.cubo_venta_lineas,item:"
 msgid "Item"
 msgstr ""
 
-#, fuzzy
 msgctxt "field:account.cubo_venta_lineas,rec_name:"
 msgid "Name"
 msgstr "Nombre"
 
-#, fuzzy
 msgctxt "field:account.cubo_venta_lineas,stock:"
 msgid "Stock"
 msgstr "Stock"
 
-#, fuzzy
 msgctxt "field:account.cubo_venta_lineas,total:"
 msgid "Total"
 msgstr "Total"
@@ -178,12 +158,10 @@ msgctxt "field:account.cubo_venta_lineas,utilidad:"
 msgid "Utilidad"
 msgstr ""
 
-#, fuzzy
 msgctxt "field:account.cubo_venta_lineas,write_date:"
 msgid "Write Date"
 msgstr "Modificado por usuario"
 
-#, fuzzy
 msgctxt "field:account.cubo_venta_lineas,write_uid:"
 msgid "Write User"
 msgstr "Usuario modificación"
@@ -909,12 +887,10 @@ msgctxt "selection:account.cubo_venta,tipo:"
 msgid ""
 msgstr ""
 
-#, fuzzy
 msgctxt "selection:account.cubo_venta,tipo:"
 msgid "Goods"
 msgstr "Artículos"
 
-#, fuzzy
 msgctxt "selection:account.cubo_venta,tipo:"
 msgid "Service"
 msgstr "Servicio"
