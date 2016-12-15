@@ -2,6 +2,228 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=utf-8\n"
 
+msgctxt "field:account.cubo_venta,bodega:"
+msgid "Bodega"
+msgstr ""
+
+msgctxt "field:account.cubo_venta,cajas:"
+msgid "Cajas"
+msgstr ""
+
+#, fuzzy
+msgctxt "field:account.cubo_venta,cantidad:"
+msgid "Cantidad"
+msgstr "Cantidad"
+
+msgctxt "field:account.cubo_venta,categoria:"
+msgid "Categoria"
+msgstr ""
+
+#, fuzzy
+msgctxt "field:account.cubo_venta,cliente:"
+msgid "Cliente"
+msgstr "CLIENTE"
+
+msgctxt "field:account.cubo_venta,costo_total:"
+msgid "Costo"
+msgstr ""
+
+#, fuzzy
+msgctxt "field:account.cubo_venta,country:"
+msgid "Country"
+msgstr "País"
+
+#, fuzzy
+msgctxt "field:account.cubo_venta,create_date:"
+msgid "Create Date"
+msgstr "Fecha de Creación"
+
+#, fuzzy
+msgctxt "field:account.cubo_venta,create_uid:"
+msgid "Create User"
+msgstr "Usuario creación"
+
+msgctxt "field:account.cubo_venta,fecha_fin:"
+msgid "Hasta"
+msgstr ""
+
+msgctxt "field:account.cubo_venta,fecha_inicio:"
+msgid "Desde"
+msgstr ""
+
+#, fuzzy
+msgctxt "field:account.cubo_venta,id:"
+msgid "ID"
+msgstr "Identificador"
+
+msgctxt "field:account.cubo_venta,lines:"
+msgid "Lineas"
+msgstr ""
+
+msgctxt "field:account.cubo_venta,lista_precio:"
+msgid "Precio"
+msgstr ""
+
+msgctxt "field:account.cubo_venta,marca:"
+msgid "Marca"
+msgstr ""
+
+#, fuzzy
+msgctxt "field:account.cubo_venta,rec_name:"
+msgid "Name"
+msgstr "Nombre"
+
+#, fuzzy
+msgctxt "field:account.cubo_venta,stock:"
+msgid "Stock"
+msgstr "Stock"
+
+msgctxt "field:account.cubo_venta,tipo:"
+msgid "Tipo"
+msgstr ""
+
+#, fuzzy
+msgctxt "field:account.cubo_venta,total:"
+msgid "Total"
+msgstr "Total"
+
+msgctxt "field:account.cubo_venta,usuario:"
+msgid "Usuario"
+msgstr ""
+
+msgctxt "field:account.cubo_venta,vendedor:"
+msgid "Vendedor"
+msgstr ""
+
+#, fuzzy
+msgctxt "field:account.cubo_venta,write_date:"
+msgid "Write Date"
+msgstr "Modificado por usuario"
+
+#, fuzzy
+msgctxt "field:account.cubo_venta,write_uid:"
+msgid "Write User"
+msgstr "Usuario modificación"
+
+#, fuzzy
+msgctxt "field:account.cubo_venta,zona:"
+msgid "Subdivision"
+msgstr "Subdivisión"
+
+msgctxt "field:account.cubo_venta_lineas,cajas:"
+msgid "Cajas"
+msgstr ""
+
+#, fuzzy
+msgctxt "field:account.cubo_venta_lineas,cantidad:"
+msgid "Cantidad"
+msgstr "Cantidad"
+
+msgctxt "field:account.cubo_venta_lineas,codigo:"
+msgid "Codigo"
+msgstr ""
+
+msgctxt "field:account.cubo_venta_lineas,costo_total:"
+msgid "Costo Total"
+msgstr ""
+
+#, fuzzy
+msgctxt "field:account.cubo_venta_lineas,create_date:"
+msgid "Create Date"
+msgstr "Fecha de Creación"
+
+#, fuzzy
+msgctxt "field:account.cubo_venta_lineas,create_uid:"
+msgid "Create User"
+msgstr "Usuario creación"
+
+msgctxt "field:account.cubo_venta_lineas,cubo_ref:"
+msgid "Cubo"
+msgstr ""
+
+#, fuzzy
+msgctxt "field:account.cubo_venta_lineas,factura:"
+msgid "Factura"
+msgstr "Factura"
+
+msgctxt "field:account.cubo_venta_lineas,fecha:"
+msgid "Fecha"
+msgstr ""
+
+#, fuzzy
+msgctxt "field:account.cubo_venta_lineas,id:"
+msgid "ID"
+msgstr "Identificador"
+
+msgctxt "field:account.cubo_venta_lineas,item:"
+msgid "Item"
+msgstr ""
+
+#, fuzzy
+msgctxt "field:account.cubo_venta_lineas,rec_name:"
+msgid "Name"
+msgstr "Nombre"
+
+#, fuzzy
+msgctxt "field:account.cubo_venta_lineas,stock:"
+msgid "Stock"
+msgstr "Stock"
+
+#, fuzzy
+msgctxt "field:account.cubo_venta_lineas,total:"
+msgid "Total"
+msgstr "Total"
+
+msgctxt "field:account.cubo_venta_lineas,utilidad:"
+msgid "Utilidad"
+msgstr ""
+
+#, fuzzy
+msgctxt "field:account.cubo_venta_lineas,write_date:"
+msgid "Write Date"
+msgstr "Modificado por usuario"
+
+#, fuzzy
+msgctxt "field:account.cubo_venta_lineas,write_uid:"
+msgid "Write User"
+msgstr "Usuario modificación"
+
+msgctxt "field:nodux_reports.print_account_receivable.start,cliente:"
+msgid "Cliente"
+msgstr "CLIENTE"
+
+msgctxt "field:nodux_reports.print_account_receivable.start,clientes:"
+msgid "Todos los clientes"
+msgstr ""
+
+msgctxt "field:nodux_reports.print_account_receivable.start,company:"
+msgid "Company"
+msgstr "Empresa"
+
+msgctxt "field:nodux_reports.print_account_receivable.start,date_end:"
+msgid "Fecha Fin"
+msgstr ""
+
+msgctxt "field:nodux_reports.print_account_receivable.start,date_start:"
+msgid "Fecha Inicio"
+msgstr ""
+
+msgctxt "field:nodux_reports.print_account_receivable.start,detallado:"
+msgid "Reporte detallado"
+msgstr ""
+
+msgctxt "field:nodux_reports.print_account_receivable.start,id:"
+msgid "ID"
+msgstr "Identificador"
+
+msgctxt "field:nodux_reports.print_account_receivable.start,vencidas:"
+msgid "Cuentas Vencidas"
+msgstr ""
+
+msgctxt "field:nodux_reports.print_account_receivable.start,vendedor:"
+msgid "Vendedor"
+msgstr ""
+
 msgctxt "field:nodux_reports.print_close_cash.start,company:"
 msgid "Company"
 msgstr "Empresa"
@@ -10,29 +232,229 @@ msgctxt "field:nodux_reports.print_close_cash.start,date:"
 msgid "Date"
 msgstr "Fecha"
 
+msgctxt "field:nodux_reports.print_close_cash.start,general:"
+msgid "Reporte General"
+msgstr ""
+
 msgctxt "field:nodux_reports.print_close_cash.start,id:"
 msgid "ID"
 msgstr "ID"
 
+msgctxt "field:nodux_reports.print_close_cash.start,punto_venta:"
+msgid "Local"
+msgstr ""
+
+msgctxt "field:nodux_reports.print_close_cash.start,usuario:"
+msgid "Usuario"
+msgstr ""
+
+msgctxt "field:nodux_reports.print_move_all.start,company:"
+msgid "Company"
+msgstr "Empresa"
+
+msgctxt "field:nodux_reports.print_move_all.start,date_end:"
+msgid "Fecha Fin"
+msgstr ""
+
+msgctxt "field:nodux_reports.print_move_all.start,date_start:"
+msgid "Fecha Inicio"
+msgstr ""
+
+msgctxt "field:nodux_reports.print_move_all.start,id:"
+msgid "ID"
+msgstr "Identificador"
+
+msgctxt "field:nodux_reports.print_salesman.start,company:"
+msgid "Company"
+msgstr "Empresa"
+
+msgctxt "field:nodux_reports.print_salesman.start,date_end:"
+msgid "Fecha Fin"
+msgstr ""
+
+msgctxt "field:nodux_reports.print_salesman.start,date_start:"
+msgid "Fecha Inicio"
+msgstr ""
+
+msgctxt "field:nodux_reports.print_salesman.start,id:"
+msgid "ID"
+msgstr "Identificador"
+
+msgctxt "field:nodux_reports.print_salesman.start,vendedor:"
+msgid "Vendedor"
+msgstr ""
+
 msgctxt "help:nodux_reports.print_close_cash.start,date:"
 msgid "Seleccione la fecha de la cual desea imprimir el reporte"
+msgstr ""
+
+msgctxt "model:account.cubo_venta,name:"
+msgid "Cubo Venta"
+msgstr ""
+
+msgctxt "model:account.cubo_venta_lineas,name:"
+msgid "Cubo Venta Lineas"
+msgstr ""
+
+msgctxt "model:ir.action,name:account_receivable"
+msgid "Reporte de Cuentas por Cobrar"
+msgstr ""
+
+msgctxt "model:ir.action,name:act_cubo_form"
+msgid "Reporte Cubo Ventas"
 msgstr ""
 
 msgctxt "model:ir.action,name:report_close_cash"
 msgid "Close cash"
 msgstr "Reporte de cierre de caja"
 
+msgctxt "model:ir.action,name:report_cubo_venta"
+msgid "Imprimir reporte"
+msgstr ""
+
+msgctxt "model:ir.action,name:report_move_all"
+msgid "Asiento Venta Detallado"
+msgstr ""
+
+msgctxt "model:ir.action,name:report_salesman"
+msgid "Reporte Vendedor"
+msgstr ""
+
+msgctxt "model:ir.action,name:wizard_account_receivable"
+msgid "Reporte de Cuentas por Cobrar"
+msgstr ""
+
 msgctxt "model:ir.action,name:wizard_close_cash"
 msgid "Close cash"
 msgstr "Reporte de cierre de caja"
+
+msgctxt "model:ir.action,name:wizard_move_all"
+msgid "Asiento Venta Detallado"
+msgstr ""
+
+msgctxt "model:ir.action,name:wizard_salesman"
+msgid "Reporte por Vendedor"
+msgstr ""
+
+msgctxt "model:ir.ui.menu,name:menu_account_receivable"
+msgid "Reporte de Cuentas por Cobrar"
+msgstr ""
 
 msgctxt "model:ir.ui.menu,name:menu_close_cash"
 msgid "Close cash"
 msgstr "Reporte de cierre de caja"
 
+msgctxt "model:ir.ui.menu,name:menu_cubo"
+msgid "Reporte Cubo Ventas"
+msgstr ""
+
+msgctxt "model:ir.ui.menu,name:menu_moveall"
+msgid "Asiento Venta Detallado"
+msgstr ""
+
+msgctxt "model:ir.ui.menu,name:menu_salesman"
+msgid "Reporte por Vendedor"
+msgstr ""
+
+msgctxt "model:nodux_reports.print_account_receivable.start,name:"
+msgid "Print Account Receivable"
+msgstr "Imprimir Cuentas por Cobrar"
+
 msgctxt "model:nodux_reports.print_close_cash.start,name:"
 msgid "Print Close Cash"
 msgstr "Imprimir cierre de caja"
+
+msgctxt "model:nodux_reports.print_move_all.start,name:"
+msgid "Print Move All Start"
+msgstr "Imprimir Todos los Asientos"
+
+msgctxt "model:nodux_reports.print_salesman.start,name:"
+msgid "Print Salesman Start"
+msgstr "Imprimir Reporte Vendedor"
+
+msgctxt "odt:nodux_reports.account_receivable:"
+msgid ":"
+msgstr ":"
+
+msgctxt "odt:nodux_reports.account_receivable:"
+msgid "Abono"
+msgstr ""
+
+msgctxt "odt:nodux_reports.account_receivable:"
+msgid "C.I/RUC"
+msgstr ""
+
+msgctxt "odt:nodux_reports.account_receivable:"
+msgid "Cliente"
+msgstr "CLIENTE"
+
+msgctxt "odt:nodux_reports.account_receivable:"
+msgid "Cuentas por Cobrar Vigentes"
+msgstr ""
+
+msgctxt "odt:nodux_reports.account_receivable:"
+msgid "Dirección"
+msgstr ""
+
+msgctxt "odt:nodux_reports.account_receivable:"
+msgid "Doc. No."
+msgstr ""
+
+msgctxt "odt:nodux_reports.account_receivable:"
+msgid "Días"
+msgstr ""
+
+msgctxt "odt:nodux_reports.account_receivable:"
+msgid "Fecha"
+msgstr ""
+
+msgctxt "odt:nodux_reports.account_receivable:"
+msgid "Nodux Cía. Ltda."
+msgstr ""
+
+msgctxt "odt:nodux_reports.account_receivable:"
+msgid "Pag."
+msgstr ""
+
+msgctxt "odt:nodux_reports.account_receivable:"
+msgid "Reporte de Cuentas por Cobrar"
+msgstr ""
+
+msgctxt "odt:nodux_reports.account_receivable:"
+msgid "Saldo"
+msgstr ""
+
+msgctxt "odt:nodux_reports.account_receivable:"
+msgid "T"
+msgstr ""
+
+msgctxt "odt:nodux_reports.account_receivable:"
+msgid "Tipo"
+msgstr ""
+
+msgctxt "odt:nodux_reports.account_receivable:"
+msgid "Total"
+msgstr "Total"
+
+msgctxt "odt:nodux_reports.account_receivable:"
+msgid "Vence"
+msgstr ""
+
+msgctxt "odt:nodux_reports.account_receivable:"
+msgid "Vendedor"
+msgstr ""
+
+msgctxt "odt:nodux_reports.account_receivable:"
+msgid "de"
+msgstr ""
+
+msgctxt "odt:nodux_reports.account_receivable:"
+msgid "eléfono"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "%"
+msgstr "%"
 
 msgctxt "odt:nodux_reports.close_cash:"
 msgid "(-)ANTICIPOS UTILIZADO EN VENTAS EN EFECTIVO"
@@ -43,8 +465,16 @@ msgid "(-)COMPROBANTES DE EGRESO"
 msgstr ""
 
 msgctxt "odt:nodux_reports.close_cash:"
+msgid "(-)DEVOLUCION EN EFECTIVO POR RETENCIONES"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
 msgid "/"
 msgstr "/"
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "4"
+msgstr ""
 
 msgctxt "odt:nodux_reports.close_cash:"
 msgid "ALCANCES EN EFECTIVO POR CREDITOS"
@@ -68,6 +498,10 @@ msgstr ""
 
 msgctxt "odt:nodux_reports.close_cash:"
 msgid "COBROS Y ABONOS EN EFECTIVO"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "COBROS Y ABONOS POR RET. FUENTE"
 msgstr ""
 
 msgctxt "odt:nodux_reports.close_cash:"
@@ -96,7 +530,7 @@ msgstr ""
 
 msgctxt "odt:nodux_reports.close_cash:"
 msgid "EFECTIVO"
-msgstr ""
+msgstr "EFECTIVO"
 
 msgctxt "odt:nodux_reports.close_cash:"
 msgid "FECHA DE IMPRESIÓN:"
@@ -112,10 +546,14 @@ msgstr ""
 
 msgctxt "odt:nodux_reports.close_cash:"
 msgid "IVA"
-msgstr ""
+msgstr "Impuesto IVA ATS"
 
 msgctxt "odt:nodux_reports.close_cash:"
 msgid "Nodux Cía. Ltda."
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "PAGOS EN EFECTIVO PLAN ACUMULATIVO"
 msgstr ""
 
 msgctxt "odt:nodux_reports.close_cash:"
@@ -127,7 +565,7 @@ msgid "SUBTOTAL IVA 0%"
 msgstr ""
 
 msgctxt "odt:nodux_reports.close_cash:"
-msgid "SUBTOTAL IVA 12%"
+msgid "SUBTOTAL IVA 1"
 msgstr ""
 
 msgctxt "odt:nodux_reports.close_cash:"
@@ -190,14 +628,349 @@ msgctxt "odt:nodux_reports.close_cash:"
 msgid "]"
 msgstr "]"
 
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "%Uti"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "/"
+msgstr "/"
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid ":"
+msgstr ":"
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "Art"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "Bodega:"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "C"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "Cant."
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "Categoria:"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "Cliente:"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid ""
+"Consulte sus comprobantes electrónicos en: http://comprobantes.nodux.ec"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "Costo Total"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "Código"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "Factura"
+msgstr "Factura"
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "Fecha"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "Item"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "Marca:"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "Nodux - (07) 2 560215 - 0999323367 - hola@nodux.ec"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "Precio:"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "RESUMEN"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "Servicios"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "Sistema"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "Stock"
+msgstr "Stock"
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "T"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "Tipo:"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "Total"
+msgstr "Total"
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "Usuario:"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "Vendedor:"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "Zona:"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "culo"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "lidad"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "osto:"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "otal:"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "s"
+msgstr "s"
+
+msgctxt "odt:nodux_reports.report_cubo_venta:"
+msgid "í"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_move_all:"
+msgid "-"
+msgstr "-"
+
+msgctxt "odt:nodux_reports.report_move_all:"
+msgid "/"
+msgstr "/"
+
+msgctxt "odt:nodux_reports.report_move_all:"
+msgid "ASIENTO"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_move_all:"
+msgid "Crédito"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_move_all:"
+msgid "Cuenta"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_move_all:"
+msgid "Código"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_move_all:"
+msgid "Débito"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_move_all:"
+msgid "FECHA DE IMPRESIÓN:"
+msgstr "FECHA DE IMPRESIÓN:"
+
+msgctxt "odt:nodux_reports.report_move_all:"
+msgid "No. Doc."
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_move_all:"
+msgid "Nodux Cía. Ltda."
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_move_all:"
+msgid "TOTALES $"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_move_all:"
+msgid "[ PAG."
+msgstr "[ PAG."
+
+msgctxt "odt:nodux_reports.report_move_all:"
+msgid "]"
+msgstr "]"
+
+msgctxt "odt:nodux_reports.report_salesman:"
+msgid "-"
+msgstr "-"
+
+msgctxt "odt:nodux_reports.report_salesman:"
+msgid "/"
+msgstr "/"
+
+msgctxt "odt:nodux_reports.report_salesman:"
+msgid ":"
+msgstr ":"
+
+msgctxt "odt:nodux_reports.report_salesman:"
+msgid "Cliente"
+msgstr "CLIENTE"
+
+msgctxt "odt:nodux_reports.report_salesman:"
+msgid "FECHA DE IMPRESIÓN:"
+msgstr "FECHA DE IMPRESIÓN:"
+
+msgctxt "odt:nodux_reports.report_salesman:"
+msgid "Fecha"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_salesman:"
+msgid "Forma de Pago"
+msgstr "Forma de pago"
+
+msgctxt "odt:nodux_reports.report_salesman:"
+msgid "IVA"
+msgstr "Impuesto IVA ATS"
+
+msgctxt "odt:nodux_reports.report_salesman:"
+msgid "Lista de Precio"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_salesman:"
+msgid "Monto total"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_salesman:"
+msgid "Nodux Cía. Ltda."
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_salesman:"
+msgid "RESUMEN"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_salesman:"
+msgid "RESUMEN DE VENTAS POR FORMA DE PAGO"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_salesman:"
+msgid "RESUMEN DE VENTAS POR LISTA DE PRECIO"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_salesman:"
+msgid "RESUMEN DE VENTAS:"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_salesman:"
+msgid "SUBTOTAL 0%"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_salesman:"
+msgid "SUBTOTAL 14%"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_salesman:"
+msgid "SUBTOTALES"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_salesman:"
+msgid "Subtotal"
+msgstr "Subtotal"
+
+msgctxt "odt:nodux_reports.report_salesman:"
+msgid "TOTALES"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_salesman:"
+msgid "[ PAG."
+msgstr "[ PAG."
+
+msgctxt "odt:nodux_reports.report_salesman:"
+msgid "]"
+msgstr "]"
+
+msgctxt "selection:account.cubo_venta,tipo:"
+msgid ""
+msgstr ""
+
+#, fuzzy
+msgctxt "selection:account.cubo_venta,tipo:"
+msgid "Goods"
+msgstr "Artículos"
+
+#, fuzzy
+msgctxt "selection:account.cubo_venta,tipo:"
+msgid "Service"
+msgstr "Servicio"
+
+msgctxt "view:account.cubo_venta:"
+msgid "Reporte de Ventas por Producto"
+msgstr ""
+
+msgctxt "view:account.cubo_venta_lineas:"
+msgid "Lineas"
+msgstr ""
+
+msgctxt "view:nodux_reports.print_account_receivable.start:"
+msgid "Print Salesman Report "
+msgstr "Imprimir Reporte Cuentas por Cobrar"
+
 msgctxt "view:nodux_reports.print_close_cash.start:"
 msgid "Print Close Cash "
 msgstr "Imprimir cierre de caja"
+
+msgctxt "view:nodux_reports.print_move_all.start:"
+msgid "Print Salesman Report "
+msgstr "Imprimir Reporte de Asientos"
+
+msgctxt "view:nodux_reports.print_salesman.start:"
+msgid "Print Salesman Report "
+msgstr "Imprimir Reporte por Vendedor"
+
+msgctxt "wizard_button:nodux_reports.print_account_receivable,start,end:"
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgctxt "wizard_button:nodux_reports.print_account_receivable,start,print_:"
+msgid "Print"
+msgstr "Imprimir"
 
 msgctxt "wizard_button:nodux_reports.print_close_cash,start,end:"
 msgid "Cancel"
 msgstr "Cancelar"
 
 msgctxt "wizard_button:nodux_reports.print_close_cash,start,print_:"
+msgid "Print"
+msgstr "Imprimir"
+
+msgctxt "wizard_button:nodux_reports.print_move_all,start,end:"
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgctxt "wizard_button:nodux_reports.print_move_all,start,print_:"
+msgid "Print"
+msgstr "Imprimir"
+
+msgctxt "wizard_button:nodux_reports.print_salesman,start,end:"
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgctxt "wizard_button:nodux_reports.print_salesman,start,print_:"
 msgid "Print"
 msgstr "Imprimir"
