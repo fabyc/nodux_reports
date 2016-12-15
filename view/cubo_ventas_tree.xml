@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!-- This file is part of Tryton.  The COPYRIGHT file at the top level of
+this repository contains the full copyright notices and license terms. -->
+<tree string="Reporte de Ventas por Producto">
+  <field name="fecha_inicio"/>
+  <field name="fecha_fin"/>
+  <field name="bodega"/>
+  <field name="usuario"/>
+  <field name="vendedor"/>
+  <field name="cliente"/>
+  <field name="marca"/>
+  <field name="lista_precio"/>
+  <field name="categoria"/>
+  <field name="tipo"/>
+  <field name="cantidad"/>
+  <field name="stock"/>
+  <field name="total"/>
+  <field name="costo_total"/>
+</tree>

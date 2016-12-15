@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!-- This file is part of the nodux_account_postdated_check module for Tryton.
+The COPYRIGHT file at the top level of this repository contains
+the full copyright notices and license terms. -->
+<form string="Lineas" col="6">
+    <label name="cubo_ref"/>
+    <field name="cubo_ref"/>
+    <newline/>
+    <label name="codigo"/>
+    <field name="codigo"/>
+    <label name="item"/>
+    <field name="item"/>
+    <newline/>
+    <label name="cantidad"/>
+    <field name="cantidad"/>
+    <newline/>
+    <label name="stock"/>
+    <field name="stock"/>
+    <label name="total"/>
+    <field name="total"/>
+    <label name="costo_total"/>
+    <field name="costo_total"/>
+    <label name="utilidad"/>
+    <field name="utilidad"/>
+    <label name="fecha"/>
+    <field name="fecha"/>
+</form>

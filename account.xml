@@ -1,0 +1,168 @@
+<?xml version="1.0"?>
+<!-- This file is part of Tryton.  The COPYRIGHT file at the top level of
+this repository contains the full copyright notices and license terms. -->
+<tryton>
+    <data>
+        <!--cIERRE DE CAJA -->
+        <record model="ir.ui.view" id="print_close_cash_start_view_form">
+            <field name="model">nodux_reports.print_close_cash.start</field>
+            <field name="type">form</field>
+            <field name="name">close_cash_start_form</field>
+        </record>
+        <record model="ir.action.wizard" id="wizard_close_cash">
+            <field name="name">Close cash</field>
+            <field name="wiz_name">nodux_reports.print_close_cash</field>
+        </record>
+        <record model="ir.action.report" id="report_close_cash">
+            <field name="name">Close cash</field>
+            <field name="model"></field>
+            <field name="report_name">nodux_reports.close_cash</field>
+            <field name="report">nodux_reports/close_cash.odt</field>
+        </record>
+        <menuitem parent="account.menu_reporting" action="wizard_close_cash"
+            id="menu_close_cash" icon="tryton-print"/>
+
+          <!--REPORTE POR VENDEDOR -->
+        <record model="ir.ui.view" id="print_salesman_start_view_form">
+            <field name="model">nodux_reports.print_salesman.start</field>
+            <field name="type">form</field>
+            <field name="name">salesman_start_form</field>
+        </record>
+        <record model="ir.action.wizard" id="wizard_salesman">
+            <field name="name">Reporte por Vendedor</field>
+            <field name="wiz_name">nodux_reports.print_salesman</field>
+        </record>
+        <record model="ir.action.report" id="report_salesman">
+            <field name="name">Reporte Vendedor</field>
+            <field name="model"></field>
+            <field name="report_name">nodux_reports.report_salesman</field>
+            <field name="report">nodux_reports/report_salesman.odt</field>
+        </record>
+        <menuitem parent="account.menu_reporting" action="wizard_salesman"
+            id="menu_salesman" icon="tryton-print"/>
+
+            <!--ASIENTO DESGLOSE -->
+        <record model="ir.ui.view" id="print_move_all_start_view_form">
+            <field name="model">nodux_reports.print_move_all.start</field>
+            <field name="type">form</field>
+            <field name="name">move_all_start_form</field>
+        </record>
+        <record model="ir.action.wizard" id="wizard_move_all">
+            <field name="name">Asiento Venta Detallado</field>
+            <field name="wiz_name">nodux_reports.print_move_all</field>
+        </record>
+
+        <record model="ir.action.report" id="report_move_all">
+            <field name="name">Asiento Venta Detallado</field>
+            <field name="model"></field>
+            <field name="report_name">nodux_reports.report_move_all</field>
+            <field name="report">nodux_reports/report_move_all.odt</field>
+        </record>
+        <menuitem parent="account.menu_reporting" action="wizard_move_all"
+            id="menu_moveall" icon="tryton-print"/>
+          <!--REPORTE DE CUENTAS POR COBRAR -->
+        <record model="ir.ui.view" id="print_account_receivable_start_view_form">
+            <field name="model">nodux_reports.print_account_receivable.start</field>
+            <field name="type">form</field>
+            <field name="name">account_receivable_start_form</field>
+        </record>
+        <record model="ir.action.wizard" id="wizard_account_receivable">
+            <field name="name">Reporte de Cuentas por Cobrar</field>
+            <field name="wiz_name">nodux_reports.print_account_receivable</field>
+        </record>
+        <record model="ir.action.report" id="account_receivable">
+            <field name="name">Reporte de Cuentas por Cobrar</field>
+            <field name="model"></field>
+            <field name="report_name">nodux_reports.account_receivable</field>
+            <field name="report">nodux_reports/report_account_receivable.odt</field>
+        </record>
+        <menuitem parent="account.menu_reporting" action="wizard_account_receivable"
+            id="menu_account_receivable" icon="tryton-print"/>
+
+        <!--Views Cubo -->
+        <!--record model="ir.ui.view" id="cubo_view_tree">
+            <field name="model">account.cubo_venta</field>
+            <field name="type">tree</field>
+            <field name="priority">20</field>
+            <field name="name">cubo_ventas_tree</field>
+        </record-->
+        <record model="ir.ui.view" id="cubo_view_form">
+            <field name="model">account.cubo_venta</field>
+            <field name="type">form</field>
+            <field name="priority">10</field>
+            <field name="name">cubo_ventas_form</field>
+        </record>
+
+        <!-- Actions -->
+        <record model="ir.action.act_window" id="act_cubo_form">
+            <field name="name">Reporte de Ventas por Producto</field>
+            <field name="res_model">account.cubo_venta</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_cubo_view_form">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="cubo_view_form"/>
+            <field name="act_window" ref="act_cubo_form"/>
+        </record>
+        <!--record model="ir.action.act_window.view" id="act_cubo_view_tree">
+            <field name="sequence" eval="20"/>
+            <field name="view" ref="cubo_view_tree"/>
+            <field name="act_window" ref="act_cubo_form"/>
+        </record-->
+        <menuitem parent="account.menu_reporting" id="menu_cubo"
+            sequence="1" icon="tryton-list" action="act_cubo_form"/>
+
+        <!--Lineas -->
+        <record model="ir.ui.view" id="account_cubo_form">
+            <field name="model">account.cubo_venta_lineas</field>
+            <field name="type">form</field>
+            <field name="name">account_cubo_line_form</field>
+        </record>
+        <record model="ir.ui.view" id="account_cubo_tree">
+            <field name="model">account.cubo_venta_lineas</field>
+            <field name="type">tree</field>
+            <field name="priority" eval="10"/>
+            <field name="name">account_cubo_line_tree</field>
+        </record>
+
+        <record model="ir.ui.view" id="cubo_line_view_tree_sequence">
+            <field name="model">account.cubo_venta_lineas</field>
+            <field name="type">tree</field>
+            <field name="priority" eval="20"/>
+            <field name="name">cubo_line_tree_sequence</field>
+        </record>
+
+        <!-- Reporte cubo ventas -->
+        <record model="ir.action.report" id="report_cubo_venta">
+           <field name="name">Reporte de Ventas por Producto</field>
+           <field name="model">account.cubo_venta</field>
+           <field name="report_name">nodux_reports.report_cubo_venta</field>
+           <field name="report">nodux_reports/cubo_venta.odt</field>
+           <field name="style"></field>
+       </record>
+
+       <record model="ir.action.keyword" id="report_cubo_venta_keyword">
+           <field name="keyword">form_print</field>
+           <field name="model">account.cubo_venta,-1</field>
+           <field name="action" ref="report_cubo_venta"/>
+       </record>
+
+       <!--Reporte de retencion de cliente -->
+       <record model="ir.ui.view" id="print_withholding_out_start_view_form">
+           <field name="model">nodux_reports.print_withholding_out.start</field>
+           <field name="type">form</field>
+           <field name="name">withholding_out_start_form</field>
+       </record>
+       <record model="ir.action.wizard" id="wizard_withholding_out">
+           <field name="name">Reporte Libro de Retenciones</field>
+           <field name="wiz_name">nodux_reports.print_withholding_out</field>
+       </record>
+       <record model="ir.action.report" id="report_withholding_out">
+           <field name="name">Libro de Retenciones</field>
+           <field name="model"></field>
+           <field name="report_name">nodux_reports.report_withholding_out</field>
+           <field name="report">nodux_reports/report_withholding_out.odt</field>
+       </record>
+       <menuitem parent="account.menu_reporting" action="wizard_withholding_out"
+           id="menu_withholding_out" icon="tryton-print"/>
+    </data>
+</tryton>

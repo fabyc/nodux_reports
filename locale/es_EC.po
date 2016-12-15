@@ -1,0 +1,203 @@
+#
+msgid ""
+msgstr "Content-Type: text/plain; charset=utf-8\n"
+
+msgctxt "field:nodux_reports.print_close_cash.start,company:"
+msgid "Company"
+msgstr "Empresa"
+
+msgctxt "field:nodux_reports.print_close_cash.start,date:"
+msgid "Date"
+msgstr "Fecha"
+
+msgctxt "field:nodux_reports.print_close_cash.start,id:"
+msgid "ID"
+msgstr "ID"
+
+msgctxt "help:nodux_reports.print_close_cash.start,date:"
+msgid "Seleccione la fecha de la cual desea imprimir el reporte"
+msgstr ""
+
+msgctxt "model:ir.action,name:report_close_cash"
+msgid "Close cash"
+msgstr "Reporte de cierre de caja"
+
+msgctxt "model:ir.action,name:wizard_close_cash"
+msgid "Close cash"
+msgstr "Reporte de cierre de caja"
+
+msgctxt "model:ir.ui.menu,name:menu_close_cash"
+msgid "Close cash"
+msgstr "Reporte de cierre de caja"
+
+msgctxt "model:nodux_reports.print_close_cash.start,name:"
+msgid "Print Close Cash"
+msgstr "Imprimir cierre de caja"
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "(-)ANTICIPOS UTILIZADO EN VENTAS EN EFECTIVO"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "(-)COMPROBANTES DE EGRESO"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "/"
+msgstr "/"
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "ALCANCES EN EFECTIVO POR CREDITOS"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "ANTICIPOS DE CLIENTES CON DOCUMENTOS"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "CAJA GENERAL"
+msgstr "CAJA GENERAL"
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "CIERRE DE CAJA"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "COBROS Y ABONOS EN DEPOSITOS"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "COBROS Y ABONOS EN EFECTIVO"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "COMPROBANTES DE EGRESO"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "COMPROBANTES DE INGRESO"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "DESCUENTOS"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "DETALLE DE CIERRE DE CAJA"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "DETALLE DE RECAUDACIONES DE CXC"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "Descripción"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "EFECTIVO"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "FECHA DE IMPRESIÓN:"
+msgstr "FECHA DE IMPRESIÓN:"
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "FECHA:"
+msgstr "FECHA:"
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "FLUJO DE EFECTIVO"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "IVA"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "Nodux Cía. Ltda."
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "SUBTOTAL"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "SUBTOTAL IVA 0%"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "SUBTOTAL IVA 12%"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "TOTAL"
+msgstr "TOTAL"
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "TOTAL CAJA GENERAL"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "TOTAL EFECTIVO"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "TOTAL FLUJO DE EFECTIVO"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "TOTAL GENERAL DE VENTAS"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "TOTAL RECAUDACIONES"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "TOTAL VENTAS A CONTADO"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "TOTAL VENTAS A CREDITO"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "Total"
+msgstr "Total"
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "VENTAS A CREDITO"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "VENTAS AL CONTADO"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "VENTAS EN CHEQUE"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "VENTAS EN EFECTIVO"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "[ PAG."
+msgstr "[ PAG."
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "]"
+msgstr "]"
+
+msgctxt "view:nodux_reports.print_close_cash.start:"
+msgid "Print Close Cash "
+msgstr "Imprimir cierre de caja"
+
+msgctxt "wizard_button:nodux_reports.print_close_cash,start,end:"
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgctxt "wizard_button:nodux_reports.print_close_cash,start,print_:"
+msgid "Print"
+msgstr "Imprimir"

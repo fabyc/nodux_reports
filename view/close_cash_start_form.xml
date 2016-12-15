@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!-- This file is part of Tryton.  The COPYRIGHT file at the top level of
+this repository contains the full copyright notices and license terms. -->
+<form string="Print Close Cash ">
+    <label name="company"/>
+    <field name="company"/>
+    <label name="date"/>
+    <field name="date"/>
+    <newline/>
+    <label name="general"/>
+    <field name="general"/>
+    <newline/>
+    <label name="usuario"/>
+    <field name="usuario"/>
+    <newline/>
+    <label name="punto_venta"/>
+    <field name="punto_venta"/>
+</form>

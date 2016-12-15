@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!-- This file is part of the nodux_account_postdated_check module for Tryton.
+The COPYRIGHT file at the top level of this repository contains
+the full copyright notices and license terms. -->
+<tree string="Lineas">
+    <field name="codigo"/>
+    <field name="item"/>
+    <field name="cantidad"/>
+    <field name="stock"/>
+    <field name="total"/>
+    <field name="costo_total"/>
+    <field name="utilidad"/>
+    <field name="factura"/>
+</tree>
