@@ -262,6 +262,26 @@ msgctxt "field:nodux_reports.print_salesman.start,vendedor:"
 msgid "Vendedor"
 msgstr ""
 
+msgctxt "field:nodux_reports.print_withholding_out.start,company:"
+msgid "Company"
+msgstr "Empresa"
+
+msgctxt "field:nodux_reports.print_withholding_out.start,date_end:"
+msgid "Fecha Fin"
+msgstr ""
+
+msgctxt "field:nodux_reports.print_withholding_out.start,date_start:"
+msgid "Fecha Inicio"
+msgstr ""
+
+msgctxt "field:nodux_reports.print_withholding_out.start,id:"
+msgid "ID"
+msgstr "Identificador"
+
+msgctxt "field:nodux_reports.print_withholding_out.start,tipo:"
+msgid "Tipo"
+msgstr ""
+
 msgctxt "help:nodux_reports.print_close_cash.start,date:"
 msgid "Seleccione la fecha de la cual desea imprimir el reporte"
 msgstr ""
@@ -279,7 +299,7 @@ msgid "Reporte de Cuentas por Cobrar"
 msgstr ""
 
 msgctxt "model:ir.action,name:act_cubo_form"
-msgid "Reporte Cubo Ventas"
+msgid "Reporte de Ventas por Producto"
 msgstr ""
 
 msgctxt "model:ir.action,name:report_close_cash"
@@ -287,7 +307,7 @@ msgid "Close cash"
 msgstr "Reporte de cierre de caja"
 
 msgctxt "model:ir.action,name:report_cubo_venta"
-msgid "Imprimir reporte"
+msgid "Reporte de Ventas por Producto"
 msgstr ""
 
 msgctxt "model:ir.action,name:report_move_all"
@@ -296,6 +316,10 @@ msgstr ""
 
 msgctxt "model:ir.action,name:report_salesman"
 msgid "Reporte Vendedor"
+msgstr ""
+
+msgctxt "model:ir.action,name:report_withholding_out"
+msgid "Libro de Retenciones"
 msgstr ""
 
 msgctxt "model:ir.action,name:wizard_account_receivable"
@@ -314,6 +338,10 @@ msgctxt "model:ir.action,name:wizard_salesman"
 msgid "Reporte por Vendedor"
 msgstr ""
 
+msgctxt "model:ir.action,name:wizard_withholding_out"
+msgid "Reporte Libro de Retenciones"
+msgstr ""
+
 msgctxt "model:ir.ui.menu,name:menu_account_receivable"
 msgid "Reporte de Cuentas por Cobrar"
 msgstr ""
@@ -323,7 +351,7 @@ msgid "Close cash"
 msgstr "Reporte de cierre de caja"
 
 msgctxt "model:ir.ui.menu,name:menu_cubo"
-msgid "Reporte Cubo Ventas"
+msgid "Reporte de Ventas por Producto"
 msgstr ""
 
 msgctxt "model:ir.ui.menu,name:menu_moveall"
@@ -332,6 +360,10 @@ msgstr ""
 
 msgctxt "model:ir.ui.menu,name:menu_salesman"
 msgid "Reporte por Vendedor"
+msgstr ""
+
+msgctxt "model:ir.ui.menu,name:menu_withholding_out"
+msgid "Reporte Libro de Retenciones"
 msgstr ""
 
 msgctxt "model:nodux_reports.print_account_receivable.start,name:"
@@ -344,11 +376,15 @@ msgstr "Imprimir cierre de caja"
 
 msgctxt "model:nodux_reports.print_move_all.start,name:"
 msgid "Print Move All Start"
-msgstr "Imprimir Todos los Asientos"
+msgstr ""
 
 msgctxt "model:nodux_reports.print_salesman.start,name:"
 msgid "Print Salesman Start"
-msgstr "Imprimir Reporte Vendedor"
+msgstr ""
+
+msgctxt "model:nodux_reports.print_withholding_out.start,name:"
+msgid "Print Withholding Out Start"
+msgstr ""
 
 msgctxt "odt:nodux_reports.account_receivable:"
 msgid ":"
@@ -508,7 +544,7 @@ msgstr ""
 
 msgctxt "odt:nodux_reports.close_cash:"
 msgid "EFECTIVO"
-msgstr "EFECTIVO"
+msgstr ""
 
 msgctxt "odt:nodux_reports.close_cash:"
 msgid "FECHA DE IMPRESIÓN:"
@@ -883,6 +919,90 @@ msgctxt "odt:nodux_reports.report_salesman:"
 msgid "]"
 msgstr "]"
 
+msgctxt "odt:nodux_reports.report_withholding_out:"
+msgid "# Retención"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_withholding_out:"
+msgid "%"
+msgstr "%"
+
+msgctxt "odt:nodux_reports.report_withholding_out:"
+msgid "-"
+msgstr "-"
+
+msgctxt "odt:nodux_reports.report_withholding_out:"
+msgid "Aplicada a"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_withholding_out:"
+msgid "Base"
+msgstr "Base"
+
+msgctxt "odt:nodux_reports.report_withholding_out:"
+msgid "C"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_withholding_out:"
+msgid "C.I/RUC"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_withholding_out:"
+msgid "Cliente"
+msgstr "CLIENTE"
+
+msgctxt "odt:nodux_reports.report_withholding_out:"
+msgid "CxC"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_withholding_out:"
+msgid "Efec."
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_withholding_out:"
+msgid "Fecha"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_withholding_out:"
+msgid "Fuente"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_withholding_out:"
+msgid "Iva"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_withholding_out:"
+msgid "LIBRO DE RETENCIONES"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_withholding_out:"
+msgid "Nodux Cía. Ltda."
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_withholding_out:"
+msgid "Pag."
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_withholding_out:"
+msgid "Tipo"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_withholding_out:"
+msgid "Total:"
+msgstr "Total:"
+
+msgctxt "odt:nodux_reports.report_withholding_out:"
+msgid "Valor"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_withholding_out:"
+msgid "de"
+msgstr ""
+
+msgctxt "odt:nodux_reports.report_withholding_out:"
+msgid "od."
+msgstr ""
+
 msgctxt "selection:account.cubo_venta,tipo:"
 msgid ""
 msgstr ""
@@ -895,6 +1015,18 @@ msgctxt "selection:account.cubo_venta,tipo:"
 msgid "Service"
 msgstr "Servicio"
 
+msgctxt "selection:nodux_reports.print_withholding_out.start,tipo:"
+msgid ""
+msgstr ""
+
+msgctxt "selection:nodux_reports.print_withholding_out.start,tipo:"
+msgid "Fuente"
+msgstr ""
+
+msgctxt "selection:nodux_reports.print_withholding_out.start,tipo:"
+msgid "Iva"
+msgstr ""
+
 msgctxt "view:account.cubo_venta:"
 msgid "Reporte de Ventas por Producto"
 msgstr ""
@@ -905,7 +1037,7 @@ msgstr ""
 
 msgctxt "view:nodux_reports.print_account_receivable.start:"
 msgid "Print Salesman Report "
-msgstr "Imprimir Reporte Cuentas por Cobrar"
+msgstr "Imprimir reporte por vendedor"
 
 msgctxt "view:nodux_reports.print_close_cash.start:"
 msgid "Print Close Cash "
@@ -913,11 +1045,15 @@ msgstr "Imprimir cierre de caja"
 
 msgctxt "view:nodux_reports.print_move_all.start:"
 msgid "Print Salesman Report "
-msgstr "Imprimir Reporte de Asientos"
+msgstr "Imprimir reporte por vendedor"
 
 msgctxt "view:nodux_reports.print_salesman.start:"
 msgid "Print Salesman Report "
-msgstr "Imprimir Reporte por Vendedor"
+msgstr "Imprimir reporte por vendedor"
+
+msgctxt "view:nodux_reports.print_withholding_out.start:"
+msgid "Print Salesman Report "
+msgstr "Imprimir reporte por vendedor"
 
 msgctxt "wizard_button:nodux_reports.print_account_receivable,start,end:"
 msgid "Cancel"
@@ -948,5 +1084,13 @@ msgid "Cancel"
 msgstr "Cancelar"
 
 msgctxt "wizard_button:nodux_reports.print_salesman,start,print_:"
+msgid "Print"
+msgstr "Imprimir"
+
+msgctxt "wizard_button:nodux_reports.print_withholding_out,start,end:"
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgctxt "wizard_button:nodux_reports.print_withholding_out,start,print_:"
 msgid "Print"
 msgstr "Imprimir"
