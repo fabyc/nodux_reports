@@ -1152,7 +1152,7 @@ class CuboVenta(ModelSQL, ModelView):
     lista_precio = fields.Many2One('product.price_list', 'Precio')
     categoria = fields.Many2One('product.category', 'Categoria')
     tipo = fields.Selection(TYPES, 'Tipo')
-    lines = fields.One2Many('account.cubo_venta_lineas', 'cubo_ref', 'Lineas')
+    lines = fields.One2Many('account.cubo_venta_lineas', 'cubo_ref', 'Lineas', readonly=True)
     cantidad = fields.Float('Cantidad')
     cajas = fields.Float('Cajas')
     stock = fields.Float('Stock')
