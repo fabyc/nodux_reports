@@ -137,7 +137,6 @@ this repository contains the full copyright notices and license terms. -->
            <field name="model">account.cubo_venta</field>
            <field name="report_name">nodux_reports.report_cubo_venta</field>
            <field name="report">nodux_reports/cubo_venta.odt</field>
-           <field name="style"></field>
        </record>
 
        <record model="ir.action.keyword" id="report_cubo_venta_keyword">

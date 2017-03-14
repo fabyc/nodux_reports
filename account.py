@@ -110,7 +110,7 @@ class CloseCash(Report):
     __name__ = 'nodux_reports.close_cash'
 
     @classmethod
-    def parse(cls, report, objects, data, localcontext):
+    def get_context(cls, records, data):
         pool = Pool()
         User = pool.get('res.user')
         user = User(Transaction().user)
@@ -123,7 +123,7 @@ class CloseCash(Report):
         module = None
         module_in_w = None
         module_out_w = None
-        Module = pool.get('ir.module.module')
+        Module = pool.get('ir.module')
         module = Module.search([('name', '=', 'nodux_account_voucher_ec'), ('state', '=', 'installed')])
         module_in_w = Module.search([('name', '=', 'nodux_account_withholding_in_ec'), ('state', '=', 'installed')])
         module_out_w = Module.search([('name', '=', 'nodux_account_withholding_out_ec'), ('state', '=', 'installed')])
@@ -213,7 +213,7 @@ class CloseCash(Report):
                 #descuentos
                 if invoice:
                     sale = None
-                    if invoice.type == 'out_invoice':
+                    if invoice.type == 'out':
                         sales = Sale.search([('description', '=', invoice.description)])
                         for s in sales:
                             sale=s
@@ -359,7 +359,7 @@ class CloseCash(Report):
                     #descuentos
                     if invoice:
                         sale = None
-                        if invoice.type == 'out_invoice':
+                        if invoice.type == 'out':
                             sales = Sale.search([('description', '=', invoice.description)])
                             for s in sales:
                                 sale=s
@@ -461,37 +461,39 @@ class CloseCash(Report):
         total_flujo = (total_contado + c_a_efectivo + alcance_efectivo_credito) - (anticipos+devolucion_retencion+total_egreso)
         total_caja = anticipos + total_flujo
 
-        localcontext['company'] = company
-        localcontext['fecha'] = fecha.strftime('%d/%m/%Y')
-        localcontext['hora'] = hora.strftime('%H:%M:%S')
-        localcontext['fecha_im'] = hora.strftime('%d/%m/%Y')
-        localcontext['ventas_efectivo']= ventas_efectivo
-        localcontext['ventas_acumulativo']= ventas_acumulativo
-        localcontext['ventas_cheque_efectivo']= ventas_cheque_efectivo
-        localcontext['total_contado']= total_contado
-        localcontext['ventas_credito']= ventas_credito
-        localcontext['alcance_efectivo_credito']= alcance_efectivo_credito
-        localcontext['total_credito']= total_credito
-        localcontext['c_a_efectivo']= c_a_efectivo
-        localcontext['c_a_deposito']=c_a_deposito
-        localcontext['c_a_retencion'] = c_a_retencion
-        localcontext['total_recaudaciones']=total_recaudaciones
-        localcontext['efectivo_egreso']=efectivo_egreso
-        localcontext['total_egreso']=total_egreso
-        localcontext['anticipos']= anticipos
-        localcontext['devolucion_retencion']= devolucion_retencion
-        localcontext['total_flujo']= total_flujo
-        localcontext['total_caja']= total_caja
-        localcontext['total_ventas']= total_contado + total_credito
-        localcontext['subtotal_ventas']= subtotal_ventas
-        localcontext['descuentos']=descuento
-        localcontext['subtotal_0']=subtotal_0
-        localcontext['subtotal_12']=subtotal_12
-        localcontext['subtotal_14']=subtotal_14
-        localcontext['iva']= (subtotal_12 * 12)/100
-        localcontext['iva14']= (subtotal_14 * 14)/100
+        report_context = super(CloseCash, cls).get_context(records, data)
 
-        return super(CloseCash, cls).parse(report, objects, data, localcontext)
+        report_context['company'] = company
+        report_context['fecha'] = fecha.strftime('%d/%m/%Y')
+        report_context['hora'] = hora.strftime('%H:%M:%S')
+        report_context['fecha_im'] = hora.strftime('%d/%m/%Y')
+        report_context['ventas_efectivo']= ventas_efectivo
+        report_context['ventas_acumulativo']= ventas_acumulativo
+        report_context['ventas_cheque_efectivo']= ventas_cheque_efectivo
+        report_context['total_contado']= total_contado
+        report_context['ventas_credito']= ventas_credito
+        report_context['alcance_efectivo_credito']= alcance_efectivo_credito
+        report_context['total_credito']= total_credito
+        report_context['c_a_efectivo']= c_a_efectivo
+        report_context['c_a_deposito']=c_a_deposito
+        report_context['c_a_retencion'] = c_a_retencion
+        report_context['total_recaudaciones']=total_recaudaciones
+        report_context['efectivo_egreso']=efectivo_egreso
+        report_context['total_egreso']=total_egreso
+        report_context['anticipos']= anticipos
+        report_context['devolucion_retencion']= devolucion_retencion
+        report_context['total_flujo']= total_flujo
+        report_context['total_caja']= total_caja
+        report_context['total_ventas']= total_contado + total_credito
+        report_context['subtotal_ventas']= subtotal_ventas
+        report_context['descuentos']=descuento
+        report_context['subtotal_0']=subtotal_0
+        report_context['subtotal_12']=subtotal_12
+        report_context['subtotal_14']=subtotal_14
+        report_context['iva']= (subtotal_12 * 12)/100
+        report_context['iva14']= (subtotal_14 * 14)/100
+
+        return report_context
 
 
 class PrintSalesmanStart(ModelView):
@@ -535,7 +537,7 @@ class PrintSalesman(Wizard):
             'date_start' : self.start.date_start,
             'date_end' : self.start.date_end,
             'vendedor' : self.start.vendedor.id
-                }
+            }
         return action, data
 
     def transition_print_(self):
@@ -545,7 +547,7 @@ class ReportSalesman(Report):
     __name__ = 'nodux_reports.report_salesman'
 
     @classmethod
-    def parse(cls, report, objects, data, localcontext):
+    def get_context(cls, records, data):
         pool = Pool()
         User = pool.get('res.user')
         user = User(Transaction().user)
@@ -625,23 +627,24 @@ class ReportSalesman(Report):
             dt = datetime.now()
             hora = datetime.astimezone(dt.replace(tzinfo=pytz.utc), timezone)
 
-        localcontext['company'] = company
-        localcontext['vendedor'] = vendedor
-        localcontext['fecha'] = fecha.strftime('%d/%m/%Y')
-        localcontext['fecha_fin'] = fecha_fin.strftime('%d/%m/%Y')
-        localcontext['hora'] = hora.strftime('%H:%M:%S')
-        localcontext['fecha_im'] = hora.strftime('%d/%m/%Y')
-        localcontext['total_ventas'] = ventas_efectivo
-        localcontext['sales'] = sales
-        localcontext['listas_total'] = listas_total
-        localcontext['total_iva'] = total_iva
-        localcontext['subtotal_total'] = subtotal_total
-        localcontext['term_pago_total'] = term_pago_total
-        localcontext['subtotal14'] = subtotal14
-        localcontext['subtotal0'] = subtotal0
+        report_context = super(ReportSalesman, cls).get_context(records, data)
 
+        report_context['company'] = company
+        report_context['vendedor'] = vendedor
+        report_context['fecha'] = fecha.strftime('%d/%m/%Y')
+        report_context['fecha_fin'] = fecha_fin.strftime('%d/%m/%Y')
+        report_context['hora'] = hora.strftime('%H:%M:%S')
+        report_context['fecha_im'] = hora.strftime('%d/%m/%Y')
+        report_context['total_ventas'] = ventas_efectivo
+        report_context['sales'] = sales
+        report_context['listas_total'] = listas_total
+        report_context['total_iva'] = total_iva
+        report_context['subtotal_total'] = subtotal_total
+        report_context['term_pago_total'] = term_pago_total
+        report_context['subtotal14'] = subtotal14
+        report_context['subtotal0'] = subtotal0
 
-        return super(ReportSalesman, cls).parse(report, objects, data, localcontext)
+        return report_context
 
 class PrintMoveAllStart(ModelView):
     'Print Move All Start'
@@ -692,7 +695,7 @@ class ReportMoveAll(Report):
     __name__ = 'nodux_reports.report_move_all'
 
     @classmethod
-    def parse(cls, report, objects, data, localcontext):
+    def get_context(cls, records, data):
         pool = Pool()
         User = pool.get('res.user')
         user = User(Transaction().user)
@@ -753,7 +756,7 @@ class ReportMoveAll(Report):
                                 if line.amount > 0:
                                     subtotal0= subtotal0 + (line.amount)
 
-                invoices = Invoice.search([('description', '=', sale.reference), ('description', '!=', None), ('type', '=', 'out_invoice')])
+                invoices = Invoice.search([('description', '=', sale.reference), ('description', '!=', None), ('type', '=', 'out')])
                 if invoices:
                     for i in invoices:
                         invoice = i
@@ -799,24 +802,25 @@ class ReportMoveAll(Report):
             dt = datetime.now()
             hora = datetime.astimezone(dt.replace(tzinfo=pytz.utc), timezone)
 
+        report_context = super(ReportMoveAll, cls).get_context(records, data)
 
-        localcontext['company'] = company
-        localcontext['fecha'] = fecha.strftime('%d/%m/%Y')
-        localcontext['fecha_fin'] = fecha_fin.strftime('%d/%m/%Y')
-        localcontext['hora'] = hora.strftime('%H:%M:%S')
-        localcontext['fecha_im'] = hora.strftime('%d/%m/%Y')
-        localcontext['total_ventas'] = ventas_efectivo
-        localcontext['total_iva'] = total_iva
-        localcontext['subtotal0'] = subtotal0
-        localcontext['subtotal14'] = subtotal14
-        localcontext['description_14'] = description_14
-        localcontext['move_lines'] = move_lines
-        localcontext['total_credito'] = total_credito
-        localcontext['total'] = total
-        localcontext['descripcion_sub_14'] = account_revenue
-        localcontext['descripcion_sub_0'] = account_revenue_0
+        report_context['company'] = company
+        report_context['fecha'] = fecha.strftime('%d/%m/%Y')
+        report_context['fecha_fin'] = fecha_fin.strftime('%d/%m/%Y')
+        report_context['hora'] = hora.strftime('%H:%M:%S')
+        report_context['fecha_im'] = hora.strftime('%d/%m/%Y')
+        report_context['total_ventas'] = ventas_efectivo
+        report_context['total_iva'] = total_iva
+        report_context['subtotal0'] = subtotal0
+        report_context['subtotal14'] = subtotal14
+        report_context['description_14'] = description_14
+        report_context['move_lines'] = move_lines
+        report_context['total_credito'] = total_credito
+        report_context['total'] = total
+        report_context['descripcion_sub_14'] = account_revenue
+        report_context['descripcion_sub_0'] = account_revenue_0
 
-        return super(ReportMoveAll, cls).parse(report, objects, data, localcontext)
+        return report_context
 
 class PrintAccountReceivable(ModelView):
     'Print Account Receivable'
@@ -903,8 +907,7 @@ class ReportAccountReceivable(Report):
     __name__ = 'nodux_reports.account_receivable'
 
     @classmethod
-    def parse(cls, report, objects, data, localcontext):
-        pool = Pool()
+    def get_context(cls, records, data):
         User = pool.get('res.user')
         user = User(Transaction().user)
         Date = pool.get('ir.date')
@@ -1118,20 +1121,23 @@ class ReportAccountReceivable(Report):
             timezone = pytz.timezone(company.timezone)
             dt = datetime.now()
             hora = datetime.astimezone(dt.replace(tzinfo=pytz.utc), timezone)
-        localcontext['company'] = company
-        localcontext['vendedor'] = vendedor
-        localcontext['fecha'] = fecha.strftime('%d/%m/%Y')
-        localcontext['fecha_fin'] = fecha_fin.strftime('%d/%m/%Y')
-        localcontext['hora'] = hora.strftime('%H:%M:%S')
-        localcontext['fecha_im'] = hora.strftime('%d/%m/%Y')
-        localcontext['total_ventas'] = ventas_efectivo
-        localcontext['account_lineas'] = account_lineas
-        localcontext['total'] = total_final
-        localcontext['detallado'] = data['detallado']
-        localcontext['account_lineas_out_det'] = account_lineas_out_det
-        localcontext['total_out_det'] = total_out_det
 
-        return super(ReportAccountReceivable, cls).parse(report, objects, data, localcontext)
+        report_context = super(ReportAccountReceivable, cls).get_context(records, data)
+
+        report_context['company'] = company
+        report_context['vendedor'] = vendedor
+        report_context['fecha'] = fecha.strftime('%d/%m/%Y')
+        report_context['fecha_fin'] = fecha_fin.strftime('%d/%m/%Y')
+        report_context['hora'] = hora.strftime('%H:%M:%S')
+        report_context['fecha_im'] = hora.strftime('%d/%m/%Y')
+        report_context['total_ventas'] = ventas_efectivo
+        report_context['account_lineas'] = account_lineas
+        report_context['total'] = total_final
+        report_context['detallado'] = data['detallado']
+        report_context['account_lineas_out_det'] = account_lineas_out_det
+        report_context['total_out_det'] = total_out_det
+
+        return report_context
 
 class CuboVenta(ModelSQL, ModelView):
     'Cubo Venta'
@@ -1152,7 +1158,7 @@ class CuboVenta(ModelSQL, ModelView):
     lista_precio = fields.Many2One('product.price_list', 'Precio')
     categoria = fields.Many2One('product.category', 'Categoria')
     tipo = fields.Selection(TYPES, 'Tipo')
-    lines = fields.One2Many('account.cubo_venta_lineas', 'cubo_ref', 'Lineas')
+    lines = fields.One2Many('account.cubo_venta_lineas', 'cubo_ref', 'Lineas', readonly=True)
     cantidad = fields.Float('Cantidad')
     cajas = fields.Float('Cajas')
     stock = fields.Float('Stock')
@@ -1188,10 +1194,10 @@ class CuboVenta(ModelSQL, ModelView):
         'lines')
     def on_change_fecha_inicio(self):
         pool = Pool()
-        res = {}
-        res['lines'] = {}
+
         Sale = pool.get('sale.sale')
         Invoice = pool.get('account.invoice')
+        CuboLineas = pool.get('account.cubo_venta_lineas')
         cantidad = 0
         cajas = 0
         stock = 0
@@ -1199,19 +1205,20 @@ class CuboVenta(ModelSQL, ModelView):
         costo_total_sumatoria = 0
         grouping=('product',)
 
+        lines = []
+
         if self.fecha_inicio and self.fecha_fin == None and self.bodega == None and self.usuario == None and self.vendedor == None and self.zona == None and self.cliente == None and self.marca == None and self.lista_precio== None and self.categoria == None and self.tipo == None:
             if self.lines:
-                res['lines']['remove'] = [x['id'] for x in self.lines]
+                return
 
             sales = Sale.search([('sale_date', '>=', self.fecha_inicio), ('sale_date', '<=', self.fecha_inicio)])
 
             for sale in sales:
                 if sale.state == "draft":
                     pass
-                elif sale.devolucion == True:
-                    pass
+
                 else:
-                    invoices = Invoice.search([('description','=',sale.reference), ('description', '!=', None),('type', '=', 'out_invoice')])
+                    invoices = Invoice.search([('description','=',sale.reference), ('description', '!=', None),('type', '=', 'out')])
                     for i in invoices:
                         invoice = i
 
@@ -1239,42 +1246,38 @@ class CuboVenta(ModelSQL, ModelView):
                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                 for clave, valor in cantidad_bodega.iteritems():
                                     stock_individual += valor
+                        cubo_line = CuboLineas()
+                        cubo_line.codigo = l.product.code
+                        cubo_line.item = l.product.template.name
+                        cubo_line.cantidad = l.quantity
+                        cubo_line.cajas = 0
+                        cubo_line.stock = stock_individual
+                        cubo_line.total = l.amount
+                        cubo_line.costo_total = costo_total
+                        cubo_line.utilidad = utilidad
+                        cubo_line.factura = invoice.number
 
-                        cubo_line = {
-                            'codigo': l.product.code,
-                            'item': l.product.template.name,
-                            'cantidad': l.quantity,
-                            'cajas': 0,
-                            'stock': stock_individual,
-                            'total': l.amount,
-                            'costo_total': costo_total,
-                            'utilidad': utilidad,
-                            'factura':invoice.number
-                        }
                         cantidad +=  l.quantity
                         cajas += 0
                         stock += stock_individual
                         total_sumatoria += l.amount
                         costo_total_sumatoria += costo_total
-                        res['lines'].setdefault('add', []).append((0, cubo_line))
-            res['cantidad'] = cantidad
-            res['cajas'] = cajas
-            res['stock'] = stock
-            res['total'] = total_sumatoria
-            res['costo_total'] = costo_total_sumatoria
-            return res
-        else:
-            return res
+                        lines.append(cubo_line)
+            self.cantidad = cantidad
+            self.cajas = cajas
+            self.stock = stock
+            self.total = total_sumatoria
+            self.costo_total = costo_total_sumatoria
+            self.lines = lines
 
     @fields.depends('fecha_inicio', 'fecha_fin', 'bodega', 'usuario', 'vendedor',
         'country','zona','cliente', 'marca', 'lista_precio', 'categoria', 'tipo',
         'lines')
     def on_change_fecha_fin(self):
         pool = Pool()
-        res = {}
-        res['lines'] = {}
         Sale = pool.get('sale.sale')
         Invoice = pool.get('account.invoice')
+        CuboLineas = pool.get('account.cubo_venta_lineas')
         cantidad = 0
         cajas = 0
         stock = 0
@@ -1282,9 +1285,11 @@ class CuboVenta(ModelSQL, ModelView):
         costo_total_sumatoria = 0
         grouping=('product',)
 
+        lines = []
+
         if self.fecha_inicio and self.fecha_fin:
             if self.lines:
-                res['lines']['remove'] = [x['id'] for x in self.lines]
+                return
 
             if self.bodega != None:
                 if self.vendedor != None:
@@ -1339,10 +1344,9 @@ class CuboVenta(ModelSQL, ModelView):
             for sale in sales:
                 if sale.state == "draft":
                     pass
-                elif sale.devolucion == True:
-                    pass
+
                 else:
-                    invoices = Invoice.search([('description','=',sale.reference), ('description', '!=', None),('type', '=', 'out_invoice')])
+                    invoices = Invoice.search([('description','=',sale.reference), ('description', '!=', None),('type', '=', 'out')])
                     for i in invoices:
                         invoice = i
 
@@ -1373,23 +1377,24 @@ class CuboVenta(ModelSQL, ModelView):
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
 
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad': utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     if self.tipo == l.product.template.type and self.categoria == l.product.template.category:
                                         costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
@@ -1414,23 +1419,22 @@ class CuboVenta(ModelSQL, ModelView):
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
 
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad': utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                             else:
                                 if self.marca:
                                     if self.tipo == l.product.template.type and self.marca == l.product.template.brand:
@@ -1455,23 +1459,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
 
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad': utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     if self.tipo == l.product.template.type:
                                         costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
@@ -1496,23 +1500,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
 
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad': utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                         else:
                             if self.categoria:
                                 if self.marca:
@@ -1538,23 +1542,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
 
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad': utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     if self.categoria == l.product.template.category:
                                         costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
@@ -1578,23 +1582,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
 
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad': utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                             else:
                                 if self.marca:
                                     if self.marca == l.product.template.brand:
@@ -1619,23 +1623,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
 
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad': utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
                                     if costo_total > Decimal(0.0):
@@ -1658,42 +1662,39 @@ class CuboVenta(ModelSQL, ModelView):
                                             for clave, valor in cantidad_bodega.iteritems():
                                                 stock_individual += valor
 
-                                    cubo_line = {
-                                        'codigo': l.product.code,
-                                        'item': l.product.template.name,
-                                        'cantidad': l.quantity,
-                                        'cajas': 0,
-                                        'stock': stock_individual,
-                                        'total': l.amount,
-                                        'costo_total': costo_total,
-                                        'utilidad': utilidad,
-                                        'factura':invoice.number
-                                    }
+                                    cubo_line = CuboLineas()
+                                    cubo_line.codigo = l.product.code
+                                    cubo_line.item = l.product.template.name
+                                    cubo_line.cantidad = l.quantity
+                                    cubo_line.cajas = 0
+                                    cubo_line.stock = stock_individual
+                                    cubo_line.total = l.amount
+                                    cubo_line.costo_total = costo_total
+                                    cubo_line.utilidad = utilidad
+                                    cubo_line.factura = invoice.number
+
                                     cantidad +=  l.quantity
                                     cajas += 0
                                     stock += stock_individual
                                     total_sumatoria += l.amount
                                     costo_total_sumatoria += costo_total
-                                    res['lines'].setdefault('add', []).append((0, cubo_line))
-
-            res['cantidad'] = cantidad
-            res['cajas'] = cajas
-            res['stock'] = stock
-            res['total'] = total_sumatoria
-            res['costo_total'] = costo_total_sumatoria
-            return res
-        else:
-            return res
+                                    lines.append(cubo_line)
+            self.cantidad = cantidad
+            self.cajas = cajas
+            self.stock = stock
+            self.total = total_sumatoria
+            self.costo_total = costo_total_sumatoria
+            self.lines = lines
 
     @fields.depends('fecha_inicio', 'fecha_fin', 'bodega', 'usuario', 'vendedor',
         'country','zona','cliente', 'marca', 'lista_precio', 'categoria', 'tipo',
         'lines')
     def on_change_bodega(self):
         pool = Pool()
-        res = {}
-        res['lines'] = {}
+        lines = []
         Sale = pool.get('sale.sale')
         Invoice = pool.get('account.invoice')
+        CuboLineas = pool.get('account.cubo_venta_lineas')
         cantidad = 0
         cajas = 0
         stock = 0
@@ -1703,7 +1704,7 @@ class CuboVenta(ModelSQL, ModelView):
 
         if self.fecha_inicio and self.fecha_fin:
             if self.lines:
-                res['lines']['remove'] = [x['id'] for x in self.lines]
+                return
 
             if self.bodega != None:
                 if self.vendedor != None:
@@ -1758,10 +1759,9 @@ class CuboVenta(ModelSQL, ModelView):
             for sale in sales:
                 if sale.state == "draft":
                     pass
-                elif sale.devolucion == True:
-                    pass
+
                 else:
-                    invoices = Invoice.search([('description','=',sale.reference), ('description', '!=', None),('type', '=', 'out_invoice')])
+                    invoices = Invoice.search([('description','=',sale.reference), ('description', '!=', None),('type', '=', 'out')])
                     for i in invoices:
                         invoice = i
 
@@ -1791,23 +1791,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
 
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad': utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     if self.tipo == l.product.template.type and self.categoria == l.product.template.category:
                                         costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
@@ -1831,23 +1831,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
 
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad': utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                             else:
                                 if self.marca:
                                     if self.tipo == l.product.template.type and self.marca == l.product.template.brand:
@@ -1872,23 +1872,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
 
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad': utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     if self.tipo == l.product.template.type:
                                         costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
@@ -1912,23 +1912,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
 
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock':stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad': utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                         else:
                             if self.categoria:
                                 if self.marca:
@@ -1954,23 +1954,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
 
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock':stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad': utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     if self.categoria == l.product.template.category:
                                         costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
@@ -1994,23 +1994,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
 
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad': utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                             else:
                                 if self.marca:
                                     if self.marca == l.product.template.brand:
@@ -2035,23 +2035,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
 
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad': utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
                                     if costo_total > Decimal(0.0):
@@ -2074,42 +2074,40 @@ class CuboVenta(ModelSQL, ModelView):
                                             for clave, valor in cantidad_bodega.iteritems():
                                                 stock_individual += valor
 
-                                    cubo_line = {
-                                        'codigo': l.product.code,
-                                        'item': l.product.template.name,
-                                        'cantidad': l.quantity,
-                                        'cajas': 0,
-                                        'stock': stock_individual,
-                                        'total': l.amount,
-                                        'costo_total': costo_total,
-                                        'utilidad': utilidad,
-                                        'factura':invoice.number
-                                    }
+                                    cubo_line = CuboLineas()
+                                    cubo_line.codigo = l.product.code
+                                    cubo_line.item = l.product.template.name
+                                    cubo_line.cantidad = l.quantity
+                                    cubo_line.cajas = 0
+                                    cubo_line.stock = stock_individual
+                                    cubo_line.total = l.amount
+                                    cubo_line.costo_total = costo_total
+                                    cubo_line.utilidad = utilidad
+                                    cubo_line.factura = invoice.number
+
                                     cantidad +=  l.quantity
                                     cajas += 0
                                     stock += stock_individual
                                     total_sumatoria += l.amount
                                     costo_total_sumatoria += costo_total
-                                    res['lines'].setdefault('add', []).append((0, cubo_line))
+                                    lines.append(cubo_line)
 
-            res['cantidad'] = cantidad
-            res['cajas'] = cajas
-            res['stock'] = stock
-            res['total'] = total_sumatoria
-            res['costo_total'] = costo_total_sumatoria
-            return res
-        else:
-            return res
+            self.cantidad = cantidad
+            self.cajas = cajas
+            self.stock = stock
+            self.total = total_sumatoria
+            self.costo_total = costo_total_sumatoria
+            self.lines = lines
 
     @fields.depends('fecha_inicio', 'fecha_fin', 'bodega', 'usuario', 'vendedor',
         'country','zona','cliente', 'marca', 'lista_precio', 'categoria', 'tipo',
         'lines')
     def on_change_usuario(self):
         pool = Pool()
-        res = {}
-        res['lines'] = {}
+        lines = []
         Sale = pool.get('sale.sale')
         Invoice = pool.get('account.invoice')
+        CuboLineas = pool.get('account.cubo_venta_lineas')
         cantidad = 0
         cajas = 0
         stock = 0
@@ -2119,7 +2117,7 @@ class CuboVenta(ModelSQL, ModelView):
 
         if self.fecha_inicio and self.fecha_fin:
             if self.lines:
-                res['lines']['remove'] = [x['id'] for x in self.lines]
+                return
 
             if self.bodega != None:
                 if self.vendedor != None:
@@ -2174,10 +2172,9 @@ class CuboVenta(ModelSQL, ModelView):
             for sale in sales:
                 if sale.state == "draft":
                     pass
-                elif sale.devolucion == True:
-                    pass
+
                 else:
-                    invoices = Invoice.search([('description','=',sale.reference), ('description', '!=', None),('type', '=', 'out_invoice')])
+                    invoices = Invoice.search([('description','=',sale.reference), ('description', '!=', None),('type', '=', 'out')])
                     for i in invoices:
                         invoice = i
                     for l in sale.lines:
@@ -2206,17 +2203,17 @@ class CuboVenta(ModelSQL, ModelView):
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
 
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
@@ -2246,23 +2243,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
 
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                             else:
                                 if self.marca:
                                     if self.tipo == l.product.template.type and self.marca == l.product.template.brand:
@@ -2286,23 +2283,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     if self.tipo == l.product.template.type:
                                         costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
@@ -2325,23 +2322,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                         else:
                             if self.categoria:
                                 if self.marca:
@@ -2366,23 +2363,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     if self.categoria == l.product.template.category:
                                         costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
@@ -2405,23 +2402,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                             else:
                                 if self.marca:
                                     if self.marca == l.product.template.brand:
@@ -2445,23 +2442,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
                                     if costo_total > Decimal(0.0):
@@ -2483,42 +2480,40 @@ class CuboVenta(ModelSQL, ModelView):
                                             cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                             for clave, valor in cantidad_bodega.iteritems():
                                                 stock_individual += valor
-                                    cubo_line = {
-                                        'codigo': l.product.code,
-                                        'item': l.product.template.name,
-                                        'cantidad': l.quantity,
-                                        'cajas': 0,
-                                        'stock': stock_individual,
-                                        'total': l.amount,
-                                        'costo_total': costo_total,
-                                        'utilidad':utilidad,
-                                        'factura':invoice.number
-                                    }
+                                    cubo_line = CuboLineas()
+                                    cubo_line.codigo = l.product.code
+                                    cubo_line.item = l.product.template.name
+                                    cubo_line.cantidad = l.quantity
+                                    cubo_line.cajas = 0
+                                    cubo_line.stock = stock_individual
+                                    cubo_line.total = l.amount
+                                    cubo_line.costo_total = costo_total
+                                    cubo_line.utilidad = utilidad
+                                    cubo_line.factura = invoice.number
+
                                     cantidad +=  l.quantity
                                     cajas += 0
                                     stock += stock_individual
                                     total_sumatoria += l.amount
                                     costo_total_sumatoria += costo_total
-                                    res['lines'].setdefault('add', []).append((0, cubo_line))
+                                    lines.append(cubo_line)
 
-            res['cantidad'] = cantidad
-            res['cajas'] = cajas
-            res['stock'] = stock
-            res['total'] = total_sumatoria
-            res['costo_total'] = costo_total_sumatoria
-            return res
-        else:
-            return res
+            self.cantidad = cantidad
+            self.cajas = cajas
+            self.stock = stock
+            self.total = total_sumatoria
+            self.costo_total = costo_total_sumatoria
+            self.lines = lines
 
     @fields.depends('fecha_inicio', 'fecha_fin', 'bodega', 'usuario', 'vendedor',
         'country','zona','cliente', 'marca', 'lista_precio', 'categoria', 'tipo',
         'lines')
     def on_change_vendedor(self):
         pool = Pool()
-        res = {}
-        res['lines'] = {}
+        lines = []
         Sale = pool.get('sale.sale')
         Invoice = pool.get('account.invoice')
+        CuboLineas = pool.get('account.cubo_venta_lineas')
         cantidad = 0
         cajas = 0
         stock = 0
@@ -2528,7 +2523,7 @@ class CuboVenta(ModelSQL, ModelView):
 
         if self.fecha_inicio and self.fecha_fin:
             if self.lines:
-                res['lines']['remove'] = [x['id'] for x in self.lines]
+                return
 
             if self.bodega != None:
                 if self.vendedor != None:
@@ -2583,10 +2578,9 @@ class CuboVenta(ModelSQL, ModelView):
             for sale in sales:
                 if sale.state == "draft":
                     pass
-                elif sale.devolucion == True:
-                    pass
+
                 else:
-                    invoices = Invoice.search([('description','=',sale.reference), ('description', '!=', None),('type', '=', 'out_invoice')])
+                    invoices = Invoice.search([('description','=',sale.reference), ('description', '!=', None),('type', '=', 'out')])
                     for i in invoices:
                         invoice = i
 
@@ -2615,23 +2609,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad': utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     if self.tipo == l.product.template.type and self.categoria == l.product.template.category:
                                         costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
@@ -2654,23 +2648,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad': utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                             else:
                                 if self.marca:
                                     if self.tipo == l.product.template.type and self.marca == l.product.template.brand:
@@ -2694,23 +2688,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad': utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     if self.tipo == l.product.template.type:
                                         costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
@@ -2733,23 +2727,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad': utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                         else:
                             if self.categoria:
                                 if self.marca:
@@ -2774,23 +2768,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad': utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     if self.categoria == l.product.template.category:
                                         costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
@@ -2813,23 +2807,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad': utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                             else:
                                 if self.marca:
                                     if self.marca == l.product.template.brand:
@@ -2853,23 +2847,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad': utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
                                     if costo_total > Decimal(0.0):
@@ -2891,43 +2885,41 @@ class CuboVenta(ModelSQL, ModelView):
                                             cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                             for clave, valor in cantidad_bodega.iteritems():
                                                 stock_individual += valor
-                                    cubo_line = {
-                                        'codigo': l.product.code,
-                                        'item': l.product.template.name,
-                                        'cantidad': l.quantity,
-                                        'cajas': 0,
-                                        'stock':stock_individual,
-                                        'total': l.amount,
-                                        'costo_total': costo_total,
-                                        'utilidad': utilidad,
-                                        'factura':invoice.number
-                                    }
+                                    cubo_line = CuboLineas()
+                                    cubo_line.codigo = l.product.code
+                                    cubo_line.item = l.product.template.name
+                                    cubo_line.cantidad = l.quantity
+                                    cubo_line.cajas = 0
+                                    cubo_line.stock = stock_individual
+                                    cubo_line.total = l.amount
+                                    cubo_line.costo_total = costo_total
+                                    cubo_line.utilidad = utilidad
+                                    cubo_line.factura = invoice.number
+
                                     cantidad +=  l.quantity
                                     cajas += 0
                                     stock += stock_individual
 
                                     total_sumatoria += l.amount
                                     costo_total_sumatoria += costo_total
-                                    res['lines'].setdefault('add', []).append((0, cubo_line))
+                                    lines.append(cubo_line)
 
-            res['cantidad'] = cantidad
-            res['cajas'] = cajas
-            res['stock'] = stock
-            res['total'] = total_sumatoria
-            res['costo_total'] = costo_total_sumatoria
-            return res
-        else:
-            return res
+            self.cantidad = cantidad
+            self.cajas = cajas
+            self.stock = stock
+            self.total = total_sumatoria
+            self.costo_total = costo_total_sumatoria
+            self.lines = lines
 
     @fields.depends('fecha_inicio', 'fecha_fin', 'bodega', 'usuario', 'vendedor',
         'country','zona','cliente', 'marca', 'lista_precio', 'categoria', 'tipo',
         'lines')
     def on_change_cliente(self):
         pool = Pool()
-        res = {}
-        res['lines'] = {}
+        lines = []
         Sale = pool.get('sale.sale')
         Invoice = pool.get('account.invoice')
+        CuboLineas = pool.get('account.cubo_venta_lineas')
         cantidad = 0
         cajas = 0
         stock = 0
@@ -2937,7 +2929,7 @@ class CuboVenta(ModelSQL, ModelView):
 
         if self.fecha_inicio and self.fecha_fin:
             if self.lines:
-                res['lines']['remove'] = [x['id'] for x in self.lines]
+                return
 
             if self.bodega != None:
                 if self.vendedor != None:
@@ -2992,10 +2984,9 @@ class CuboVenta(ModelSQL, ModelView):
             for sale in sales:
                 if sale.state == "draft":
                     pass
-                elif sale.devolucion == True:
-                    pass
+
                 else:
-                    invoices = Invoice.search([('description','=',sale.reference), ('description', '!=', None),('type', '=', 'out_invoice')])
+                    invoices = Invoice.search([('description','=',sale.reference), ('description', '!=', None),('type', '=', 'out')])
                     for i in invoices:
                         invoice = i
 
@@ -3024,23 +3015,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     if self.tipo == l.product.template.type and self.categoria == l.product.template.category:
                                         costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
@@ -3063,23 +3054,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock':stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                             else:
                                 if self.marca:
                                     if self.tipo == l.product.template.type and self.marca == l.product.template.brand:
@@ -3103,23 +3094,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock':stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     if self.tipo == l.product.template.type:
                                         costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
@@ -3142,23 +3133,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock':stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                         else:
                             if self.categoria:
                                 if self.marca:
@@ -3183,23 +3174,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock':stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     if self.categoria == l.product.template.category:
                                         costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
@@ -3222,23 +3213,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock':stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                             else:
                                 if self.marca:
                                     if self.marca == l.product.template.brand:
@@ -3262,23 +3253,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock':stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
                                     if costo_total > Decimal(0.0):
@@ -3300,42 +3291,40 @@ class CuboVenta(ModelSQL, ModelView):
                                             cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                             for clave, valor in cantidad_bodega.iteritems():
                                                 stock_individual += valor
-                                    cubo_line = {
-                                        'codigo': l.product.code,
-                                        'item': l.product.template.name,
-                                        'cantidad': l.quantity,
-                                        'cajas': 0,
-                                        'stock': stock_individual,
-                                        'total': l.amount,
-                                        'costo_total': costo_total,
-                                        'utilidad':utilidad,
-                                        'factura':invoice.number
-                                    }
+                                    cubo_line = CuboLineas()
+                                    cubo_line.codigo = l.product.code
+                                    cubo_line.item = l.product.template.name
+                                    cubo_line.cantidad = l.quantity
+                                    cubo_line.cajas = 0
+                                    cubo_line.stock = stock_individual
+                                    cubo_line.total = l.amount
+                                    cubo_line.costo_total = costo_total
+                                    cubo_line.utilidad = utilidad
+                                    cubo_line.factura = invoice.number
+
                                     cantidad +=  l.quantity
                                     cajas += 0
                                     stock += stock_individual
                                     total_sumatoria += l.amount
                                     costo_total_sumatoria += costo_total
-                                    res['lines'].setdefault('add', []).append((0, cubo_line))
+                                    lines.append(cubo_line)
 
-            res['cantidad'] = cantidad
-            res['cajas'] = cajas
-            res['stock'] = stock
-            res['total'] = total_sumatoria
-            res['costo_total'] = costo_total_sumatoria
-            return res
-        else:
-            return res
+            self.cantidad = cantidad
+            self.cajas = cajas
+            self.stock = stock
+            self.total = total_sumatoria
+            self.costo_total = costo_total_sumatoria
+            self.lines = lines
 
     @fields.depends('fecha_inicio', 'fecha_fin', 'bodega', 'usuario', 'vendedor',
         'country','zona','cliente', 'marca', 'lista_precio', 'categoria', 'tipo',
         'lines')
     def on_change_marca(self):
         pool = Pool()
-        res = {}
-        res['lines'] = {}
+        lines = []
         Sale = pool.get('sale.sale')
         Invoice = pool.get('account.invoice')
+        CuboLineas = pool.get('account.cubo_venta_lineas')
         cantidad = 0
         cajas = 0
         stock = 0
@@ -3345,7 +3334,7 @@ class CuboVenta(ModelSQL, ModelView):
 
         if self.fecha_inicio and self.fecha_fin:
             if self.lines:
-                res['lines']['remove'] = [x['id'] for x in self.lines]
+                return
 
             if self.bodega != None:
                 if self.vendedor != None:
@@ -3400,10 +3389,9 @@ class CuboVenta(ModelSQL, ModelView):
             for sale in sales:
                 if sale.state == "draft":
                     pass
-                elif sale.devolucion == True:
-                    pass
+
                 else:
-                    invoices = Invoice.search([('description','=',sale.reference), ('description', '!=', None),('type', '=', 'out_invoice')])
+                    invoices = Invoice.search([('description','=',sale.reference), ('description', '!=', None),('type', '=', 'out')])
                     for i in invoices:
                         invoice = i
 
@@ -3432,23 +3420,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock':stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     if self.tipo == l.product.template.type and self.categoria == l.product.template.category:
                                         costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
@@ -3471,23 +3459,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock':stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                             else:
                                 if self.marca:
                                     if self.tipo == l.product.template.type and self.marca == l.product.template.brand:
@@ -3511,23 +3499,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock':stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     if self.tipo == l.product.template.type:
                                         costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
@@ -3550,23 +3538,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock':stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                         else:
                             if self.categoria:
                                 if self.marca:
@@ -3591,23 +3579,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock':stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     if self.categoria == l.product.template.category:
                                         costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
@@ -3630,23 +3618,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock':stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                             else:
                                 if self.marca:
                                     if self.marca == l.product.template.brand:
@@ -3670,23 +3658,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock':stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
                                     if costo_total > Decimal(0.0):
@@ -3708,42 +3696,40 @@ class CuboVenta(ModelSQL, ModelView):
                                             cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                             for clave, valor in cantidad_bodega.iteritems():
                                                 stock_individual += valor
-                                    cubo_line = {
-                                        'codigo': l.product.code,
-                                        'item': l.product.template.name,
-                                        'cantidad': l.quantity,
-                                        'cajas': 0,
-                                        'stock':stock_individual,
-                                        'total': l.amount,
-                                        'costo_total': costo_total,
-                                        'utilidad':utilidad,
-                                        'factura':invoice.number
-                                    }
+                                    cubo_line = CuboLineas()
+                                    cubo_line.codigo = l.product.code
+                                    cubo_line.item = l.product.template.name
+                                    cubo_line.cantidad = l.quantity
+                                    cubo_line.cajas = 0
+                                    cubo_line.stock = stock_individual
+                                    cubo_line.total = l.amount
+                                    cubo_line.costo_total = costo_total
+                                    cubo_line.utilidad = utilidad
+                                    cubo_line.factura = invoice.number
+
                                     cantidad +=  l.quantity
                                     cajas += 0
                                     stock += stock_individual
                                     total_sumatoria += l.amount
                                     costo_total_sumatoria += costo_total
-                                    res['lines'].setdefault('add', []).append((0, cubo_line))
+                                    lines.append(cubo_line)
 
-            res['cantidad'] = cantidad
-            res['cajas'] = cajas
-            res['stock'] = stock
-            res['total'] = total_sumatoria
-            res['costo_total'] = costo_total_sumatoria
-            return res
-        else:
-            return res
+            self.cantidad = cantidad
+            self.cajas = cajas
+            self.stock = stock
+            self.total = total_sumatoria
+            self.costo_total = costo_total_sumatoria
+            self.lines = lines
 
     @fields.depends('fecha_inicio', 'fecha_fin', 'bodega', 'usuario', 'vendedor',
         'country','zona','cliente', 'marca', 'lista_precio', 'categoria', 'tipo',
         'lines')
     def on_change_lista_precio(self):
         pool = Pool()
-        res = {}
-        res['lines'] = {}
+        lines = []
         Sale = pool.get('sale.sale')
         Invoice = pool.get('account.invoice')
+        CuboLineas = pool.get('account.cubo_venta_lineas')
         cantidad = 0
         cajas = 0
         stock = 0
@@ -3753,7 +3739,7 @@ class CuboVenta(ModelSQL, ModelView):
 
         if self.fecha_inicio and self.fecha_fin:
             if self.lines:
-                res['lines']['remove'] = [x['id'] for x in self.lines]
+                return
 
             if self.bodega != None:
                 if self.vendedor != None:
@@ -3808,10 +3794,9 @@ class CuboVenta(ModelSQL, ModelView):
             for sale in sales:
                 if sale.state == "draft":
                     pass
-                elif sale.devolucion == True:
-                    pass
+
                 else:
-                    invoices = Invoice.search([('description','=',sale.reference), ('description', '!=', None),('type', '=', 'out_invoice')])
+                    invoices = Invoice.search([('description','=',sale.reference), ('description', '!=', None),('type', '=', 'out')])
                     for i in invoices:
                         invoice = i
 
@@ -3840,23 +3825,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock':stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     if self.tipo == l.product.template.type and self.categoria == l.product.template.category:
                                         costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
@@ -3879,23 +3864,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock':stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                             else:
                                 if self.marca:
                                     if self.tipo == l.product.template.type and self.marca == l.product.template.brand:
@@ -3919,23 +3904,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock':stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     if self.tipo == l.product.template.type:
                                         costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
@@ -3958,23 +3943,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock':stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                         else:
                             if self.categoria:
                                 if self.marca:
@@ -3999,23 +3984,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock':stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     if self.categoria == l.product.template.category:
                                         costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
@@ -4038,23 +4023,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock':stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                             else:
                                 if self.marca:
                                     if self.marca == l.product.template.brand:
@@ -4079,23 +4064,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock':stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
                                     if costo_total > Decimal(0.0):
@@ -4117,42 +4102,40 @@ class CuboVenta(ModelSQL, ModelView):
                                             cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                             for clave, valor in cantidad_bodega.iteritems():
                                                 stock_individual += valor
-                                    cubo_line = {
-                                        'codigo': l.product.code,
-                                        'item': l.product.template.name,
-                                        'cantidad': l.quantity,
-                                        'cajas': 0,
-                                        'stock':stock_individual,
-                                        'total': l.amount,
-                                        'costo_total': costo_total,
-                                        'utilidad':utilidad,
-                                        'factura':invoice.number
-                                    }
+                                    cubo_line = CuboLineas()
+                                    cubo_line.codigo = l.product.code
+                                    cubo_line.item = l.product.template.name
+                                    cubo_line.cantidad = l.quantity
+                                    cubo_line.cajas = 0
+                                    cubo_line.stock = stock_individual
+                                    cubo_line.total = l.amount
+                                    cubo_line.costo_total = costo_total
+                                    cubo_line.utilidad = utilidad
+                                    cubo_line.factura = invoice.number
+
                                     cantidad +=  l.quantity
                                     cajas += 0
                                     stock += stock_individual
                                     total_sumatoria += l.amount
                                     costo_total_sumatoria += costo_total
-                                    res['lines'].setdefault('add', []).append((0, cubo_line))
+                                    lines.append(cubo_line)
 
-            res['cantidad'] = cantidad
-            res['cajas'] = cajas
-            res['stock'] = stock
-            res['total'] = total_sumatoria
-            res['costo_total'] = costo_total_sumatoria
-            return res
-        else:
-            return res
+            self.cantidad = cantidad
+            self.cajas = cajas
+            self.stock = stock
+            self.total = total_sumatoria
+            self.costo_total = costo_total_sumatoria
+            self.lines = lines
 
     @fields.depends('fecha_inicio', 'fecha_fin', 'bodega', 'usuario', 'vendedor',
         'country','zona','cliente', 'marca', 'lista_precio', 'categoria', 'tipo',
         'lines')
     def on_change_categoria(self):
         pool = Pool()
-        res = {}
-        res['lines'] = {}
+        lines = []
         Sale = pool.get('sale.sale')
         Invoice = pool.get('account.invoice')
+        CuboLineas = pool.get('account.cubo_venta_lineas')
         cantidad = 0
         cajas = 0
         stock = 0
@@ -4162,7 +4145,7 @@ class CuboVenta(ModelSQL, ModelView):
 
         if self.fecha_inicio and self.fecha_fin:
             if self.lines:
-                res['lines']['remove'] = [x['id'] for x in self.lines]
+                return
 
             if self.bodega != None:
                 if self.vendedor != None:
@@ -4217,10 +4200,9 @@ class CuboVenta(ModelSQL, ModelView):
             for sale in sales:
                 if sale.state == "draft":
                     pass
-                elif sale.devolucion == True:
-                    pass
+
                 else:
-                    invoices = Invoice.search([('description','=',sale.reference), ('description', '!=', None),('type', '=', 'out_invoice')])
+                    invoices = Invoice.search([('description','=',sale.reference), ('description', '!=', None),('type', '=', 'out')])
                     for i in invoices:
                         invoice = i
 
@@ -4250,23 +4232,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock':stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     if self.tipo == l.product.template.type and self.categoria == l.product.template.category:
                                         costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
@@ -4289,23 +4271,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock':stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                             else:
                                 if self.marca:
                                     if self.tipo == l.product.template.type and self.marca == l.product.template.brand:
@@ -4329,23 +4311,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     if self.tipo == l.product.template.type:
                                         costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
@@ -4368,23 +4350,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                         else:
                             if self.categoria:
                                 if self.marca:
@@ -4409,23 +4391,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     if self.categoria == l.product.template.category:
                                         costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
@@ -4448,23 +4430,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                             else:
                                 if self.marca:
                                     if self.marca == l.product.template.brand:
@@ -4488,23 +4470,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
                                     if costo_total > Decimal(0.0):
@@ -4526,42 +4508,40 @@ class CuboVenta(ModelSQL, ModelView):
                                             cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                             for clave, valor in cantidad_bodega.iteritems():
                                                 stock_individual += valor
-                                    cubo_line = {
-                                        'codigo': l.product.code,
-                                        'item': l.product.template.name,
-                                        'cantidad': l.quantity,
-                                        'cajas': 0,
-                                        'stock': stock_individual,
-                                        'total': l.amount,
-                                        'costo_total': costo_total,
-                                        'utilidad':utilidad,
-                                        'factura':invoice.number
-                                    }
+                                    cubo_line = CuboLineas()
+                                    cubo_line.codigo = l.product.code
+                                    cubo_line.item = l.product.template.name
+                                    cubo_line.cantidad = l.quantity
+                                    cubo_line.cajas = 0
+                                    cubo_line.stock = stock_individual
+                                    cubo_line.total = l.amount
+                                    cubo_line.costo_total = costo_total
+                                    cubo_line.utilidad = utilidad
+                                    cubo_line.factura = invoice.number
+
                                     cantidad +=  l.quantity
                                     cajas += 0
                                     stock += stock_individual
                                     total_sumatoria += l.amount
                                     costo_total_sumatoria += costo_total
-                                    res['lines'].setdefault('add', []).append((0, cubo_line))
+                                    lines.append(cubo_line)
 
-            res['cantidad'] = cantidad
-            res['cajas'] = cajas
-            res['stock'] = stock
-            res['total'] = total_sumatoria
-            res['costo_total'] = costo_total_sumatoria
-            return res
-        else:
-            return res
+            self.cantidad = cantidad
+            self.cajas = cajas
+            self.stock = stock
+            self.total = total_sumatoria
+            self.costo_total = costo_total_sumatoria
+            self.lines = lines
 
     @fields.depends('fecha_inicio', 'fecha_fin', 'bodega', 'usuario', 'vendedor',
         'country','zona','cliente', 'marca', 'lista_precio', 'categoria', 'tipo',
         'lines')
     def on_change_tipo(self):
         pool = Pool()
-        res = {}
-        res['lines'] = {}
+        lines = []
         Sale = pool.get('sale.sale')
         Invoice = pool.get('account.invoice')
+        CuboLineas = pool.get('account.cubo_venta_lineas')
         cantidad = 0
         cajas = 0
         stock = 0
@@ -4571,7 +4551,7 @@ class CuboVenta(ModelSQL, ModelView):
 
         if self.fecha_inicio and self.fecha_fin:
             if self.lines:
-                res['lines']['remove'] = [x['id'] for x in self.lines]
+                return
 
             if self.bodega != None:
                 if self.vendedor != None:
@@ -4626,10 +4606,9 @@ class CuboVenta(ModelSQL, ModelView):
             for sale in sales:
                 if sale.state == "draft":
                     pass
-                elif sale.devolucion == True:
-                    pass
+
                 else:
-                    invoices = Invoice.search([('description','=',sale.reference), ('description', '!=', None),('type', '=', 'out_invoice'), ('state', '!=', 'draft')])
+                    invoices = Invoice.search([('description','=',sale.reference), ('description', '!=', None),('type', '=', 'out'), ('state', '!=', 'draft')])
                     for i in invoices:
                         invoice = i
 
@@ -4658,24 +4637,24 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
 
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     if self.tipo == l.product.template.type and self.categoria == l.product.template.category:
                                         costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
@@ -4698,23 +4677,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                             else:
                                 if self.marca:
                                     if self.tipo == l.product.template.type and self.marca == l.product.template.brand:
@@ -4738,23 +4717,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     if self.tipo == l.product.template.type:
                                         costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
@@ -4777,23 +4756,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                         else:
                             if self.categoria:
                                 if self.marca:
@@ -4818,23 +4797,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock': stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     if self.categoria == l.product.template.category:
                                         costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
@@ -4857,23 +4836,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock':stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                             else:
                                 if self.marca:
                                     if self.marca == l.product.template.brand:
@@ -4897,23 +4876,23 @@ class CuboVenta(ModelSQL, ModelView):
                                                 cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                                 for clave, valor in cantidad_bodega.iteritems():
                                                     stock_individual += valor
-                                        cubo_line = {
-                                            'codigo': l.product.code,
-                                            'item': l.product.template.name,
-                                            'cantidad': l.quantity,
-                                            'cajas': 0,
-                                            'stock':stock_individual,
-                                            'total': l.amount,
-                                            'costo_total': costo_total,
-                                            'utilidad':utilidad,
-                                            'factura':invoice.number
-                                        }
+                                        cubo_line = CuboLineas()
+                                        cubo_line.codigo = l.product.code
+                                        cubo_line.item = l.product.template.name
+                                        cubo_line.cantidad = l.quantity
+                                        cubo_line.cajas = 0
+                                        cubo_line.stock = stock_individual
+                                        cubo_line.total = l.amount
+                                        cubo_line.costo_total = costo_total
+                                        cubo_line.utilidad = utilidad
+                                        cubo_line.factura = invoice.number
+
                                         cantidad +=  l.quantity
                                         cajas += 0
                                         stock += stock_individual
                                         total_sumatoria += l.amount
                                         costo_total_sumatoria += costo_total
-                                        res['lines'].setdefault('add', []).append((0, cubo_line))
+                                        lines.append(cubo_line)
                                 else:
                                     costo_total = (l.product.template.cost_price)*Decimal(l.quantity)
                                     if costo_total > Decimal(0.0):
@@ -4935,31 +4914,29 @@ class CuboVenta(ModelSQL, ModelView):
                                             cantidad_bodega = l.product.products_by_location(location_ids=location_ids, product_ids=[l.product.id], with_childs=True,grouping=grouping)
                                             for clave, valor in cantidad_bodega.iteritems():
                                                 stock_individual += valor
-                                    cubo_line = {
-                                        'codigo': l.product.code,
-                                        'item': l.product.template.name,
-                                        'cantidad': l.quantity,
-                                        'cajas': 0,
-                                        'stock':stock_individual,
-                                        'total': l.amount,
-                                        'costo_total': costo_total,
-                                        'utilidad':utilidad,
-                                        'factura':invoice.number
-                                    }
+                                    cubo_line = CuboLineas()
+                                    cubo_line.codigo = l.product.code
+                                    cubo_line.item = l.product.template.name
+                                    cubo_line.cantidad = l.quantity
+                                    cubo_line.cajas = 0
+                                    cubo_line.stock = stock_individual
+                                    cubo_line.total = l.amount
+                                    cubo_line.costo_total = costo_total
+                                    cubo_line.utilidad = utilidad
+                                    cubo_line.factura = invoice.number
+
                                     cantidad +=  l.quantity
                                     cajas += 0
                                     stock += stock_individual
                                     total_sumatoria += l.amount
                                     costo_total_sumatoria += costo_total
-                                    res['lines'].setdefault('add', []).append((0, cubo_line))
-            res['cantidad'] = cantidad
-            res['cajas'] = cajas
-            res['stock'] = stock
-            res['total'] = total_sumatoria
-            res['costo_total'] = costo_total_sumatoria
-            return res
-        else:
-            return res
+                                    lines.append(cubo_line)
+            self.cantidad = cantidad
+            self.cajas = cajas
+            self.stock = stock
+            self.total = total_sumatoria
+            self.costo_total = costo_total_sumatoria
+            self.lines = lines
 
     @fields.depends('cantidad','cajas','stock','total','costo_total','lines')
     def on_change_lines(self):
@@ -4979,12 +4956,11 @@ class CuboVenta(ModelSQL, ModelView):
                 total_sumatoria += line.total
                 costo_total_sumatoria += line.costo_total
 
-            res['cantidad'] = cantidad
-            res['cajas'] = cajas
-            res['stock'] = stock
-            res['total'] = total_sumatoria
-            res['costo_total'] = costo_total_sumatoria
-        return res
+            self.cantidad = cantidad
+            self.cajas = cajas
+            self.stock = stock
+            self.total = total_sumatoria
+            self.costo_total = costo_total_sumatoria
 
 class CuboVentaLineas(ModelSQL, ModelView):
     'Cubo Venta Lineas'
@@ -5010,36 +4986,37 @@ class CuboVentaReport(Report):
     __name__ = 'nodux_reports.report_cubo_venta'
 
     @classmethod
-    def parse(cls, report, records, data, localcontext):
+    def get_context(cls, records, data):
         pool = Pool()
         User = pool.get('res.user')
         user = User(Transaction().user)
         CuboVentas = pool.get('account.cubo_venta')
         cubo_ventas = records[0]
 
-        localcontext['user'] = user
-        localcontext['company'] = user.company
-        localcontext['fecha_inicio'] = cubo_ventas.fecha_inicio
-        localcontext['fecha_fin'] = cubo_ventas.fecha_fin
-        localcontext['bodega'] = cubo_ventas.bodega
-        localcontext['usuario'] = cubo_ventas.usuario
-        localcontext['vendedor'] = cubo_ventas.vendedor
-        localcontext['country'] = cubo_ventas.country
-        localcontext['zona'] = cubo_ventas.zona
-        localcontext['cliente'] = cubo_ventas.cliente
-        localcontext['marca'] = cubo_ventas.marca
-        localcontext['lista_precio'] = cubo_ventas.lista_precio
-        localcontext['categoria'] = cubo_ventas.categoria
-        localcontext['tipo'] = cubo_ventas.tipo
-        localcontext['lines'] = cubo_ventas.lines
-        localcontext['cantidad'] = cubo_ventas.cantidad
-        localcontext['cajas'] = cubo_ventas.cajas
-        localcontext['stock'] = cubo_ventas.stock
-        localcontext['total'] = cubo_ventas.total
-        localcontext['costo_total'] = cubo_ventas.costo_total
+        report_context = super(CuboVentaReport, cls).get_context(records, data)
 
-        return super(CuboVentaReport, cls).parse(report, records, data,
-                localcontext=localcontext)
+        report_context['user'] = user
+        report_context['company'] = user.company
+        report_context['fecha_inicio'] = cubo_ventas.fecha_inicio
+        report_context['fecha_fin'] = cubo_ventas.fecha_fin
+        report_context['bodega'] = cubo_ventas.bodega
+        report_context['usuario'] = cubo_ventas.usuario
+        report_context['vendedor'] = cubo_ventas.vendedor
+        report_context['country'] = cubo_ventas.country
+        report_context['zona'] = cubo_ventas.zona
+        report_context['cliente'] = cubo_ventas.cliente
+        report_context['marca'] = cubo_ventas.marca
+        report_context['lista_precio'] = cubo_ventas.lista_precio
+        report_context['categoria'] = cubo_ventas.categoria
+        report_context['tipo'] = cubo_ventas.tipo
+        report_context['lines'] = cubo_ventas.lines
+        report_context['cantidad'] = cubo_ventas.cantidad
+        report_context['cajas'] = cubo_ventas.cajas
+        report_context['stock'] = cubo_ventas.stock
+        report_context['total'] = cubo_ventas.total
+        report_context['costo_total'] = cubo_ventas.costo_total
+
+        return report_context
 
 class PrintWithholdingOutStart(ModelView):
     'Print Withholding Out Start'
@@ -5093,7 +5070,7 @@ class ReportWithholdingOut(Report):
     __name__ = 'nodux_reports.report_withholding_out'
 
     @classmethod
-    def parse(cls, report, objects, data, localcontext):
+    def get_context(cls, records, data):
         pool = Pool()
         User = pool.get('res.user')
         user = User(Transaction().user)
@@ -5124,14 +5101,16 @@ class ReportWithholdingOut(Report):
             dt = datetime.now()
             hora = datetime.astimezone(dt.replace(tzinfo=pytz.utc), timezone)
 
-        localcontext['company'] = company
-        localcontext['fecha'] = fecha.strftime('%d/%m/%Y')
-        localcontext['fecha_fin'] = fecha_fin.strftime('%d/%m/%Y')
-        localcontext['hora'] = hora.strftime('%H:%M:%S')
-        localcontext['fecha_im'] = hora.strftime('%d/%m/%Y')
-        localcontext['total_retencion'] = total_retencion
-        localcontext['withholdings'] = withholdings
-        localcontext['tipo'] = tipo
+        report_context = super(ReportWithholdingOut, cls).get_context(records, data)
+
+        report_context['company'] = company
+        report_context['fecha'] = fecha.strftime('%d/%m/%Y')
+        report_context['fecha_fin'] = fecha_fin.strftime('%d/%m/%Y')
+        report_context['hora'] = hora.strftime('%H:%M:%S')
+        report_context['fecha_im'] = hora.strftime('%d/%m/%Y')
+        report_context['total_retencion'] = total_retencion
+        report_context['withholdings'] = withholdings
+        report_context['tipo'] = tipo
 
 
-        return super(ReportWithholdingOut, cls).parse(report, objects, data, localcontext)
+        return report_context
