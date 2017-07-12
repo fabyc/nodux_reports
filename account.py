@@ -513,7 +513,7 @@ class CloseCash(Report):
                         anticipos += a.amount_original
 
                 #ventas contado en efectivo
-                statements = Statement.search([('date', '=', fecha), ('tipo_pago', 'efectivo')])
+                statements = Statement.search([('date', '=', fecha), ('tipo_pago','=', 'efectivo')])
                 #statement_line = StatementLine.search([('date', '=', fecha)])
                 if statements:
                     for statement in statements:
@@ -524,7 +524,7 @@ class CloseCash(Report):
                                 ventas_efectivo += line.amount
 
                 #ventas cheque contado
-                statements_ch = Statement.search([('date', '=', fecha), ('tipo_pago', 'cheque')])
+                statements_ch = Statement.search([('date', '=', fecha), ('tipo_pago', '=','cheque')])
                 #statement_line = StatementLine.search([('date', '=', fecha)])
                 if statements_ch:
                     for statement in statements_ch:
@@ -535,7 +535,7 @@ class CloseCash(Report):
                                 ventas_cheque_efectivo += line.amount
 
                 #ventas_depositos
-                statements_d = Statement.search([('date', '=', fecha), ('tipo_pago', 'deposito')])
+                statements_d = Statement.search([('date', '=', fecha), ('tipo_pago', '=','deposito')])
                 #statement_line = StatementLine.search([('date', '=', fecha)])
                 if statements_d:
                     for statement in statements_d:
@@ -546,7 +546,7 @@ class CloseCash(Report):
                                 ventas_depositos += line.amount
 
                 #ventas_tarjeta_credito
-                statements_tc = Statement.search([('date', '=', fecha), ('tipo_pago', 'tarjeta')])
+                statements_tc = Statement.search([('date', '=', fecha), ('tipo_pago', '=','tarjeta')])
                 #statement_line = StatementLine.search([('date', '=', fecha)])
                 if statements_tc:
                     for statement in statements_tc:
@@ -557,7 +557,7 @@ class CloseCash(Report):
                                 ventas_tarjeta_credito += line.amount
 
                 #ventas a credito
-                sales = Sale.search([('pago', 'Credito'), ('sale_date', fecha)])
+                sales = Sale.search([('pago', '=', 'Credito'), ('sale_date', '=', fecha)])
                 for sale in sales:
                     ventas_credito += sale.total_amount
 
@@ -588,6 +588,7 @@ class CloseCash(Report):
         localcontext['total_contado']= total_contado
         localcontext['ventas_credito']= ventas_credito
         #pendientelocalcontext['alcance_efectivo_credito']= alcance_efectivo_credito
+        localcontext['alcance_efectivo_credito']= alcance_efectivo_credito
         #pendientelocalcontext['alcance_cheques_credito']= alcance_cheques_credito
         localcontext['anticipos_utilizados'] = anticipos_utilizados
         localcontext['total_credito']= total_credito
