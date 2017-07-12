@@ -118,6 +118,7 @@ class CloseCash(Report):
         Company = pool.get('company.company')
         Move = pool.get('account.move')
         MoveLine = pool.get ('account.move.line')
+        Statement = pool.get('account.statement')
         StatementLine = pool.get('account.statement.line')
         Invoice = pool.get('account.invoice')
         module = None
@@ -127,6 +128,7 @@ class CloseCash(Report):
         module = Module.search([('name', '=', 'nodux_account_voucher_ec'), ('state', '=', 'installed')])
         module_in_w = Module.search([('name', '=', 'nodux_account_withholding_in_ec'), ('state', '=', 'installed')])
         module_out_w = Module.search([('name', '=', 'nodux_account_withholding_out_ec'), ('state', '=', 'installed')])
+        module_advanced = Module.search([('name', '=', 'nodux_sale_payment_advanced_payment'), ('state', '=', 'installed')])
 
         if module:
             Voucher = pool.get('account.voucher')
@@ -149,6 +151,7 @@ class CloseCash(Report):
         total_credito = Decimal(0.0)
         c_a_efectivo = Decimal(0.0)
         c_a_retencion = Decimal(0.0)
+        c_a_retencion_iva = Decimal(0.0)
         c_a_deposito = Decimal(0.0)
         total_recaudaciones = Decimal(0.0)
         efectivo_egreso = Decimal(0.0)
@@ -165,6 +168,16 @@ class CloseCash(Report):
         subtotal_14 = Decimal(0.0)
         iva = Decimal(0.0)
         ventas_acumulativo = Decimal(0.0)
+        ventas_depositos = Decimal(0.0)
+        ventas_tarjeta_credito = Decimal(0.0)
+        alcance_cheques_credito = Decimal(0.0)
+        anticipos_utilizados = Decimal(0.0)
+        c_a_cheques = Decimal(0.0)
+        c_a_efectivo = Decimal(0.0)
+        c_a_deposito = Decimal(0.0)
+        c_a_anticipos = Decimal(0.0)
+        c_a_tc = Decimal(0.0)
+
 
         if general == True:
             if company.timezone:
@@ -258,6 +271,7 @@ class CloseCash(Report):
                                     efectivo_egreso += v_l_p.amount
 
             #retencion proveedor
+            """
             if module_in_w:
                 withholding_ins = WithholdingIn.search([('withholding_date', '=', fecha), ('type', '=', 'in_withholding')])
                 for w_i in withholding_ins:
@@ -265,14 +279,25 @@ class CloseCash(Report):
                         c_a_retencion += w_i_t.amount
                 if c_a_retencion < Decimal(0.0):
                     c_a_retencion = c_a_retencion *(-1)
+            """
             #retencion de cliente
             if module_out_w:
                 withholding_outs = WithholdingOut.search([('withholding_date', '=', fecha), ('type', '=', 'out_withholding')])
                 for w_o in withholding_outs:
-                    for w_o_t in w_o.taxes:
-                        devolucion_retencion += w_o_t.amount
+                    if w_o.efectivo == True:
+                        devolucion_retencion += w_o.total_amount2
+                    else:
+                        for tax in w_o.taxes:
+                            if tax.tipo == 'RENTA':
+                                c_a_retencion += tax.amount
+                            elif tax.tipo == 'IVA':
+                                c_a_retencion_iva += tax.amoun
                 if devolucion_retencion < Decimal(0.0):
                     devolucion_retencion = devolucion_retencion * (-1)
+                if c_a_retencion < Decimal(0.0):
+                    c_a_retencion = c_a_retencion * (-1)
+                if c_a_retencion_iva < Decimal(0.0):
+                    c_a_retencion_iva = c_a_retencion_iva * (-1)
             #calculo de anticipos
             anticipo = None
             if module:
@@ -282,16 +307,82 @@ class CloseCash(Report):
                 for a in anticipo:
                     anticipos += a.amount_original
 
-            #ventas en efectivo
-            statement_line = StatementLine.search([('date', '=', fecha)])
+            #ventas contado en efectivo
+            statements = Statement.search([('date', '=', fecha), ('tipo_pago', '=','efectivo')])
+            #statement_line = StatementLine.search([('date', '=', fecha)])
+            if statements:
+                for statement in statements:
+                    for line in statement.lines:
+                        if line.sale.acumulativo == True:
+                            ventas_acumulativo += line.amount
+                        else:
+                            ventas_efectivo += line.amount
 
-            for s_l in statement_line:
-                if s_l.sale.acumulativo == True:
-                    ventas_acumulativo += s_l.amount
-                else:
-                    ventas_efectivo += s_l.amount
+            #ventas cheque contado
+            statements_ch = Statement.search([('date', '=', fecha), ('tipo_pago','=', 'cheque')])
+            #statement_line = StatementLine.search([('date', '=', fecha)])
+            if statements_ch:
+                for statement in statements_ch:
+                    for line in statement.lines:
+                        if line.sale.acumulativo == True:
+                            ventas_acumulativo += line.amount
+                        else:
+                            ventas_cheque_efectivo += line.amount
+
+            #ventas_depositos
+            statements_d = Statement.search([('date', '=', fecha), ('tipo_pago', '=', 'deposito')])
+            #statement_line = StatementLine.search([('date', '=', fecha)])
+            if statements_d:
+                for statement in statements_d:
+                    for line in statement.lines:
+                        if line.sale.acumulativo == True:
+                            ventas_acumulativo += line.amount
+                        else:
+                            ventas_depositos += line.amount
+
+            #ventas_tarjeta_credito
+            statements_tc = Statement.search([('date', '=', fecha), ('tipo_pago', '=', 'tarjeta')])
+            #statement_line = StatementLine.search([('date', '=', fecha)])
+            if statements_tc:
+                for statement in statements_tc:
+                    for line in statement.lines:
+                        if line.sale.acumulativo == True:
+                            ventas_acumulativo += line.amount
+                        else:
+                            ventas_tarjeta_credito += line.amount
 
             #ventas a credito
+            sales = Sale.search([('pago','=', 'Credito'), ('sale_date', '=',fecha)])
+            for sale in sales:
+                ventas_credito += sale.total_amount
+
+            #alcance_efectivo_credito alcance_cheques_credito
+
+            #anticipos_utilizados
+            if module_advanced:
+                moves_advanced = Move.search([('date', '=', fecha)])
+                for move_advanced in moves_advanced:
+                    if 'Anticipo' in move_advanced.origin:
+                        for line in move_advanced.lines:
+                            if 'used' in line.description:
+                                anticipos_utilizados += line.credit
+            #detalle de cxc
+            if module:
+                vouchers = Voucher.search([('voucher_type', '=', 'receipt'), ('date', '=', fecha)])
+                for voucher in vouchers:
+                    for line in voucher.pay_lines:
+                        if 'efec' in str(line.pay_mode.name).lower():
+                            c_a_efectivo += line.pay_amount
+                        if 'che' in str(line.pay_mode.name).lower():
+                            c_a_cheques += line.pay_amount
+                        if 'dep' in str(line.pay_mode.name).lower():
+                            c_a_deposito += line.pay_amount
+                        if 'tar' in str(line.pay_mode.name).lower():
+                            c_a_tc += line.pay_amount
+
+            #pendiente c_a_anticipos
+
+            """
             invoices = Invoice.search([('invoice_date', '=', fecha)])
             for i in invoices:
                 moveslines_c = MoveLine.search([('move', '=', i.move),('maturity_date', '!=', None), ('debit', '!=', Decimal(0.0))])
@@ -302,6 +393,7 @@ class CloseCash(Report):
                 for slc in statement_line:
                     if slc.invoice.id == i.id:
                         alcance_efectivo_credito += slc.amount
+            """
         else:
             if data['usuario']:
                 usuario = data['usuario']
@@ -379,15 +471,7 @@ class CloseCash(Report):
                                             if str('{:.0f}'.format(t.rate*100)) == '0':
                                                 subtotal_0 = subtotal_0 + (line.amount)
                                         subtotal_ventas = (subtotal_12 + subtotal_0 + subtotal_14)-descuento
-                    #retencion cliente
-                    """
-                    if withholding:
-                        if withholding.type == 'out_withholding':
-                            for w_t in withholding.taxes:
-                                devolucion_retencion += w_t.amount
-                                if devolucion_retencion < Decimal(0.0):
-                                    devolucion_retencion = devolucion_retencion * (-1)
-                    """
+
                 if module:
                     vouchers = Voucher.search([('date', '=', fecha), ('write_uid', '=', usuario)])
                     for voucher in vouchers:
@@ -410,7 +494,7 @@ class CloseCash(Report):
                         for w_i_t in w_i.taxes:
                             c_a_retencion += w_i_t.amount
                     if c_a_retencion < Decimal(0.0):
-                        c_a_retencion = c_a_retencion *(-1)
+                        c_a_retencion = c_a_retencion * (-1)
                 #retencion de cliente
                 if module_out_w:
                     withholding_outs = WithholdingOut.search([('withholding_date', '=', fecha), ('type', '=', 'out_withholding'), ('write_uid', '=', usuario)])
@@ -428,26 +512,54 @@ class CloseCash(Report):
                     for a in anticipo:
                         anticipos += a.amount_original
 
-                #ventas en efectivo
-                statement_line = StatementLine.search([('date', '=', fecha), ('write_uid', '=', usuario)])
+                #ventas contado en efectivo
+                statements = Statement.search([('date', '=', fecha), ('tipo_pago', 'efectivo')])
+                #statement_line = StatementLine.search([('date', '=', fecha)])
+                if statements:
+                    for statement in statements:
+                        for line in statement.lines:
+                            if line.sale.acumulativo == True:
+                                ventas_acumulativo += line.amount
+                            else:
+                                ventas_efectivo += line.amount
 
-                for s_l in statement_line:
-                    if s_l.sale.acumulativo == True:
-                        ventas_acumulativo += s_l.amount
-                    else:
-                        ventas_efectivo += s_l.amount
+                #ventas cheque contado
+                statements_ch = Statement.search([('date', '=', fecha), ('tipo_pago', 'cheque')])
+                #statement_line = StatementLine.search([('date', '=', fecha)])
+                if statements_ch:
+                    for statement in statements_ch:
+                        for line in statement.lines:
+                            if line.sale.acumulativo == True:
+                                ventas_acumulativo += line.amount
+                            else:
+                                ventas_cheque_efectivo += line.amount
+
+                #ventas_depositos
+                statements_d = Statement.search([('date', '=', fecha), ('tipo_pago', 'deposito')])
+                #statement_line = StatementLine.search([('date', '=', fecha)])
+                if statements_d:
+                    for statement in statements_d:
+                        for line in statement.lines:
+                            if line.sale.acumulativo == True:
+                                ventas_acumulativo += line.amount
+                            else:
+                                ventas_depositos += line.amount
+
+                #ventas_tarjeta_credito
+                statements_tc = Statement.search([('date', '=', fecha), ('tipo_pago', 'tarjeta')])
+                #statement_line = StatementLine.search([('date', '=', fecha)])
+                if statements_tc:
+                    for statement in statements_tc:
+                        for line in statement.lines:
+                            if line.sale.acumulativo == True:
+                                ventas_acumulativo += line.amount
+                            else:
+                                ventas_tarjeta_credito += line.amount
 
                 #ventas a credito
-                invoices = Invoice.search([('invoice_date', '=', fecha), ('write_uid', '=', usuario)])
-                for i in invoices:
-                    moveslines_c = MoveLine.search([('move', '=', i.move),('maturity_date', '!=', None), ('debit', '!=', Decimal(0.0))])
-                    for mlc in moveslines_c:
-                        if mlc.maturity_date > fecha:
-                            ventas_credito += mlc.debit
-                            description = mlc.description
-                    for slc in statement_line:
-                        if slc.invoice.id == i.id:
-                            alcance_efectivo_credito += slc.amount
+                sales = Sale.search([('pago', 'Credito'), ('sale_date', fecha)])
+                for sale in sales:
+                    ventas_credito += sale.total_amount
 
         if ventas_credito > 0 :
             ventas_credito = ventas_credito - alcance_efectivo_credito
@@ -455,7 +567,7 @@ class CloseCash(Report):
             ventas_credito = ventas_credito
         ventas_efectivo = ventas_efectivo - alcance_efectivo_credito
         total_contado = ventas_efectivo + ventas_cheque_efectivo + ventas_acumulativo
-        total_credito = ventas_credito
+        total_credito = ventas_credito - anticipos_utilizados
         total_recaudaciones = c_a_efectivo + c_a_deposito
         total_egreso = efectivo_egreso
         total_flujo = (total_contado + c_a_efectivo + alcance_efectivo_credito) - (anticipos+devolucion_retencion+total_egreso)
@@ -463,21 +575,38 @@ class CloseCash(Report):
 
         localcontext['company'] = company
         localcontext['fecha'] = fecha.strftime('%d/%m/%Y')
+        localcontext['fecha_fin'] = fecha.strftime('%d/%m/%Y')
         localcontext['hora'] = hora.strftime('%H:%M:%S')
         localcontext['fecha_im'] = hora.strftime('%d/%m/%Y')
         localcontext['ventas_efectivo']= ventas_efectivo
+        #pendiente localcontext['alcance_efectivo_voucher'] = alcance_efectivo_voucher
+        localcontext['ventas_depositos'] = ventas_depositos
+        localcontext['ventas_cheque_efectivo'] = ventas_cheque_efectivo
+        #pendiente localcontext['anticipos_ventas_cheque_efectivo'] = anticipos_ventas_cheque_efectivo
+        localcontext['ventas_tarjeta_credito'] = ventas_tarjeta_credito
         localcontext['ventas_acumulativo']= ventas_acumulativo
-        localcontext['ventas_cheque_efectivo']= ventas_cheque_efectivo
         localcontext['total_contado']= total_contado
         localcontext['ventas_credito']= ventas_credito
-        localcontext['alcance_efectivo_credito']= alcance_efectivo_credito
+        #pendientelocalcontext['alcance_efectivo_credito']= alcance_efectivo_credito
+        #pendientelocalcontext['alcance_cheques_credito']= alcance_cheques_credito
+        localcontext['anticipos_utilizados'] = anticipos_utilizados
         localcontext['total_credito']= total_credito
+        localcontext['c_a_cheques']= c_a_cheques
         localcontext['c_a_efectivo']= c_a_efectivo
-        localcontext['c_a_deposito']=c_a_deposito
+        #pendientelocalcontext['c_a_notas_debito']= c_a_notas_debito
+        #pendientelocalcontext['c_a_notas_credito']= c_a_notas_credito
+        localcontext['c_a_retencion_iva'] = c_a_retencion_iva
         localcontext['c_a_retencion'] = c_a_retencion
+        localcontext['c_a_deposito']=c_a_deposito
+        localcontext['c_a_anticipos'] = c_a_anticipos
+        localcontext['c_a_tc'] = c_a_tc
         localcontext['total_recaudaciones']=total_recaudaciones
         localcontext['efectivo_egreso']=efectivo_egreso
         localcontext['total_egreso']=total_egreso
+        #localcontext['efectivo_ingreso']=efectivo_ingreso
+        #localcontext['deposito_ingreso']=deposito_ingreso
+        #localcontext['total_comp_ingreso']=total_comp_ingreso
+
         localcontext['anticipos']= anticipos
         localcontext['devolucion_retencion']= devolucion_retencion
         localcontext['total_flujo']= total_flujo
@@ -485,6 +614,8 @@ class CloseCash(Report):
         localcontext['total_ventas']= total_contado + total_credito
         localcontext['subtotal_ventas']= subtotal_ventas
         localcontext['descuentos']=descuento
+        #localcontext['descuentos_efectivos'] = descuentos_efectivos
+        #localcontext['descuentos_unitarios'] = descuentos_unitarios
         localcontext['subtotal_0']=subtotal_0
         localcontext['subtotal_12']=subtotal_12
         localcontext['subtotal_14']=subtotal_14
@@ -535,7 +666,7 @@ class PrintSalesman(Wizard):
             'date_start' : self.start.date_start,
             'date_end' : self.start.date_end,
             'vendedor' : self.start.vendedor.id
-                }
+            }
         return action, data
 
     def transition_print_(self):
@@ -566,7 +697,7 @@ class ReportSalesman(Report):
         ventas_efectivo =  Decimal(0.0)
         total_iva =  Decimal(0.0)
         subtotal_total =  Decimal(0.0)
-        subtotal14 = Decimal(0.0)
+        subtotal12 = Decimal(0.0)
         subtotal0 = Decimal(0.0)
         term_pago = []
         term_pago_total = []
@@ -576,6 +707,8 @@ class ReportSalesman(Report):
         if sales:
             for s in sales:
                 if s.price_list in listas:
+                    pass
+                elif s.price_list == None:
                     pass
                 else:
                     listas.append(s.price_list)
@@ -592,8 +725,8 @@ class ReportSalesman(Report):
                     for line in s.lines:
                         if  line.taxes:
                             for t in line.taxes:
-                                if str('{:.0f}'.format(t.rate*100)) == '14':
-                                    subtotal14 += (line.amount)
+                                if str('{:.0f}'.format(t.rate*100)) == '12':
+                                    subtotal12 += (line.amount)
                     for line in s.lines:
                         if  line.taxes:
                             for t in line.taxes:
@@ -637,9 +770,8 @@ class ReportSalesman(Report):
         localcontext['total_iva'] = total_iva
         localcontext['subtotal_total'] = subtotal_total
         localcontext['term_pago_total'] = term_pago_total
-        localcontext['subtotal14'] = subtotal14
+        localcontext['subtotal12'] = subtotal12
         localcontext['subtotal0'] = subtotal0
-
 
         return super(ReportSalesman, cls).parse(report, objects, data, localcontext)
 
