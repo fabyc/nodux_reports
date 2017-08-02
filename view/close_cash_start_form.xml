@@ -4,8 +4,11 @@ this repository contains the full copyright notices and license terms. -->
 <form string="Print Close Cash ">
     <label name="company"/>
     <field name="company"/>
+    <newline/>
     <label name="date"/>
     <field name="date"/>
+    <label name="to_date"/>
+    <field name="to_date"/>
     <newline/>
     <label name="general"/>
     <field name="general"/>

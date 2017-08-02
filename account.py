@@ -44,7 +44,8 @@ class PrintCloseCashStart(ModelView):
     'Print Close Cash'
     __name__ = 'nodux_reports.print_close_cash.start'
     company = fields.Many2One('company.company', 'Company', required=True)
-    date = fields.Date("Date", help="Seleccione la fecha de la cual desea imprimir el reporte")
+    date = fields.Date("Date", help="Seleccione la fecha de la cual desea imprimir el reporte", required=True)
+    to_date = fields.Date("To Date", required=True)
     general = fields.Boolean('Reporte General')
     usuario = fields.Many2One('res.user', 'Usuario', states={
         'invisible':Eval('general', True),
@@ -67,6 +68,12 @@ class PrintCloseCashStart(ModelView):
         date = date.today()
         return date
 
+    @staticmethod
+    def default_to_date():
+        date = Pool().get('ir.date')
+        date = date.today()
+        return date
+
 
 class PrintCloseCash(Wizard):
     'Print Trial Balance Detailed'
@@ -83,6 +90,7 @@ class PrintCloseCash(Wizard):
             data = {
                 'company': self.start.company.id,
                 'date' : self.start.date,
+                'to_date': self.start.to_date,
                 'general' : True
                 }
         else:
@@ -90,6 +98,7 @@ class PrintCloseCash(Wizard):
                 data = {
                     'company': self.start.company.id,
                     'date' : self.start.date,
+                    'to_date': self.start.to_date,
                     'usuario' : self.start.usuario.id,
                     'general' : False
                     }
@@ -97,6 +106,7 @@ class PrintCloseCash(Wizard):
                 data = {
                     'company': self.start.company.id,
                     'date' : self.start.date,
+                    'to_date': self.start.to_date,
                     'punto_venta' : self.start.punto_venta.id,
                     'general' : False
                     }
@@ -140,6 +150,7 @@ class CloseCash(Report):
         Invoice = pool.get('account.invoice')
         Sale = pool.get('sale.sale')
         fecha = data['date']
+        fecha_fin = data['to_date']
         general = data['general']
         company = Company(data['company'])
         ventas_efectivo =  Decimal(0.0)
@@ -186,7 +197,7 @@ class CloseCash(Report):
                 hora = datetime.astimezone(dt.replace(tzinfo=pytz.utc), timezone)
 
             monto = Decimal(0.0)
-            move = Move.search([('post_date', '=', fecha)])
+            move = Move.search([('post_date', '>=', fecha), ('post_date', '<=', fecha_fin)])
             voucher = None
             withholding = None
             #movimiento de venta -> credito contado, efectivo, cheque
@@ -256,7 +267,7 @@ class CloseCash(Report):
                                 devolucion_retencion = devolucion_retencion * (-1)
                 """
             if module:
-                vouchers = Voucher.search([('date', '=', fecha)])
+                vouchers = Voucher.search([('date', '>=', fecha), ('date', '<=', fecha_fin)])
                 for voucher in vouchers:
                     VoucherLine = pool.get('account.voucher.line')
                     VoucherPayMode = pool.get('account.voucher.line.paymode')
@@ -282,7 +293,7 @@ class CloseCash(Report):
             """
             #retencion de cliente
             if module_out_w:
-                withholding_outs = WithholdingOut.search([('withholding_date', '=', fecha), ('type', '=', 'out_withholding')])
+                withholding_outs = WithholdingOut.search([('withholding_date', '>=', fecha),('withholding_date', '<=', fecha_fin), ('type', '=', 'out_withholding')])
                 for w_o in withholding_outs:
                     if w_o.efectivo == True:
                         devolucion_retencion += w_o.total_amount2
@@ -302,13 +313,13 @@ class CloseCash(Report):
             anticipo = None
             if module:
                 Anticipos = pool.get('account.voucher.line.credits')
-                anticipo = Anticipos.search([('date', '=', fecha)])
+                anticipo = Anticipos.search([('date', '>=', fecha), ('date', '<=', fecha_fin) ])
             if anticipo:
                 for a in anticipo:
                     anticipos += a.amount_original
 
             #ventas contado en efectivo
-            statements = Statement.search([('date', '=', fecha), ('tipo_pago', '=','efectivo')])
+            statements = Statement.search([('date', '>=', fecha), ('date', '<=', fecha_fin),('tipo_pago', '=','efectivo')])
             #statement_line = StatementLine.search([('date', '=', fecha)])
             if statements:
                 for statement in statements:
@@ -319,7 +330,7 @@ class CloseCash(Report):
                             ventas_efectivo += line.amount
 
             #ventas cheque contado
-            statements_ch = Statement.search([('date', '=', fecha), ('tipo_pago','=', 'cheque')])
+            statements_ch = Statement.search([('date', '>=', fecha), ('date', '<=', fecha_fin), ('tipo_pago','=', 'cheque')])
             #statement_line = StatementLine.search([('date', '=', fecha)])
             if statements_ch:
                 for statement in statements_ch:
@@ -330,7 +341,7 @@ class CloseCash(Report):
                             ventas_cheque_efectivo += line.amount
 
             #ventas_depositos
-            statements_d = Statement.search([('date', '=', fecha), ('tipo_pago', '=', 'deposito')])
+            statements_d = Statement.search([('date', '>=', fecha), ('date', '<=', fecha_fin), ('tipo_pago', '=', 'deposito')])
             #statement_line = StatementLine.search([('date', '=', fecha)])
             if statements_d:
                 for statement in statements_d:
@@ -341,7 +352,7 @@ class CloseCash(Report):
                             ventas_depositos += line.amount
 
             #ventas_tarjeta_credito
-            statements_tc = Statement.search([('date', '=', fecha), ('tipo_pago', '=', 'tarjeta')])
+            statements_tc = Statement.search([('date', '>=', fecha),('date', '<=', fecha_fin), ('tipo_pago', '=', 'tarjeta')])
             #statement_line = StatementLine.search([('date', '=', fecha)])
             if statements_tc:
                 for statement in statements_tc:
@@ -352,7 +363,7 @@ class CloseCash(Report):
                             ventas_tarjeta_credito += line.amount
 
             #ventas a credito
-            sales = Sale.search([('pago','=', 'Credito'), ('sale_date', '=',fecha)])
+            sales = Sale.search([('pago','=', 'Credito'), ('sale_date', '>=',fecha), ('sale_date', '<=',fecha_fin)])
             for sale in sales:
                 ventas_credito += sale.total_amount
 
@@ -360,7 +371,7 @@ class CloseCash(Report):
 
             #anticipos_utilizados
             if module_advanced:
-                moves_advanced = Move.search([('date', '=', fecha)])
+                moves_advanced = Move.search([('date', '>=', fecha), ('date', '<=', fecha_fin)])
                 for move_advanced in moves_advanced:
                     if 'Anticipo' in move_advanced.origin:
                         for line in move_advanced.lines:
@@ -368,7 +379,7 @@ class CloseCash(Report):
                                 anticipos_utilizados += line.credit
             #detalle de cxc
             if module:
-                vouchers = Voucher.search([('voucher_type', '=', 'receipt'), ('date', '=', fecha)])
+                vouchers = Voucher.search([('voucher_type', '=', 'receipt'), ('date', '>=', fecha), ('date', '<=', fecha_fin)])
                 for voucher in vouchers:
                     for line in voucher.pay_lines:
                         if 'efec' in str(line.pay_mode.name).lower():
@@ -411,7 +422,7 @@ class CloseCash(Report):
                     hora = datetime.astimezone(dt.replace(tzinfo=pytz.utc), timezone)
 
                 monto = Decimal(0.0)
-                move = Move.search([('post_date', '=', fecha), ('create_uid', '=', usuario)])
+                move = Move.search([('post_date', '=', fecha), ('post_date', '=', fecha_fin), ('create_uid', '=', usuario)])
                 voucher = None
                 withholding = None
                 #movimiento de venta -> credito contado, efectivo, cheque
@@ -473,7 +484,7 @@ class CloseCash(Report):
                                         subtotal_ventas = (subtotal_12 + subtotal_0 + subtotal_14)-descuento
 
                 if module:
-                    vouchers = Voucher.search([('date', '=', fecha), ('write_uid', '=', usuario)])
+                    vouchers = Voucher.search([('date', '>=', fecha), ('date', '<=', fecha_fin), ('write_uid', '=', usuario)])
                     for voucher in vouchers:
                         VoucherLine = pool.get('account.voucher.line')
                         VoucherPayMode = pool.get('account.voucher.line.paymode')
@@ -489,7 +500,7 @@ class CloseCash(Report):
 
                 #retencion proveedor
                 if module_in_w:
-                    withholding_ins = WithholdingIn.search([('withholding_date', '=', fecha), ('type', '=', 'in_withholding'), ('write_uid', '=', usuario)])
+                    withholding_ins = WithholdingIn.search([('withholding_date', '>=', fecha), ('withholding_date', '<=', fecha_fin), ('type', '=', 'in_withholding'), ('write_uid', '=', usuario)])
                     for w_i in withholding_ins:
                         for w_i_t in w_i.taxes:
                             c_a_retencion += w_i_t.amount
@@ -497,7 +508,7 @@ class CloseCash(Report):
                         c_a_retencion = c_a_retencion * (-1)
                 #retencion de cliente
                 if module_out_w:
-                    withholding_outs = WithholdingOut.search([('withholding_date', '=', fecha), ('type', '=', 'out_withholding'), ('write_uid', '=', usuario)])
+                    withholding_outs = WithholdingOut.search([('withholding_date', '>=', fecha), ('withholding_date', '<=', fecha_fin), ('type', '=', 'out_withholding'), ('write_uid', '=', usuario)])
                     for w_o in withholding_outs:
                         for w_o_t in w_o.taxes:
                             devolucion_retencion += w_o_t.amount
@@ -507,13 +518,13 @@ class CloseCash(Report):
                 anticipo = None
                 if module:
                     Anticipos = pool.get('account.voucher.line.credits')
-                    anticipo = Anticipos.search([('date', '=', fecha), ('write_uid', '=', usuario)])
+                    anticipo = Anticipos.search([('date', '>=', fecha),('date', '<=', fecha_fin), ('write_uid', '=', usuario)])
                 if anticipo:
                     for a in anticipo:
                         anticipos += a.amount_original
 
                 #ventas contado en efectivo
-                statements = Statement.search([('date', '=', fecha), ('tipo_pago','=', 'efectivo')])
+                statements = Statement.search([('date', '>=', fecha), ('date', '<=', fecha_fin), ('tipo_pago','=', 'efectivo')])
                 #statement_line = StatementLine.search([('date', '=', fecha)])
                 if statements:
                     for statement in statements:
@@ -524,7 +535,7 @@ class CloseCash(Report):
                                 ventas_efectivo += line.amount
 
                 #ventas cheque contado
-                statements_ch = Statement.search([('date', '=', fecha), ('tipo_pago', '=','cheque')])
+                statements_ch = Statement.search([('date', '>=', fecha), ('date', '<=', fecha_fin), ('tipo_pago', '=','cheque')])
                 #statement_line = StatementLine.search([('date', '=', fecha)])
                 if statements_ch:
                     for statement in statements_ch:
@@ -535,7 +546,7 @@ class CloseCash(Report):
                                 ventas_cheque_efectivo += line.amount
 
                 #ventas_depositos
-                statements_d = Statement.search([('date', '=', fecha), ('tipo_pago', '=','deposito')])
+                statements_d = Statement.search([('date', '>=', fecha), ('date', '<=', fecha_fin), ('tipo_pago', '=','deposito')])
                 #statement_line = StatementLine.search([('date', '=', fecha)])
                 if statements_d:
                     for statement in statements_d:
@@ -546,7 +557,7 @@ class CloseCash(Report):
                                 ventas_depositos += line.amount
 
                 #ventas_tarjeta_credito
-                statements_tc = Statement.search([('date', '=', fecha), ('tipo_pago', '=','tarjeta')])
+                statements_tc = Statement.search([('date', '>=', fecha), ('date', '<=', fecha_fin), ('tipo_pago', '=','tarjeta')])
                 #statement_line = StatementLine.search([('date', '=', fecha)])
                 if statements_tc:
                     for statement in statements_tc:
@@ -557,7 +568,7 @@ class CloseCash(Report):
                                 ventas_tarjeta_credito += line.amount
 
                 #ventas a credito
-                sales = Sale.search([('pago', '=', 'Credito'), ('sale_date', '=', fecha)])
+                sales = Sale.search([('pago', '=', 'Credito'), ('sale_date', '>=', fecha), ('sale_date', '<=', fecha_fin)])
                 for sale in sales:
                     ventas_credito += sale.total_amount
 
@@ -575,7 +586,7 @@ class CloseCash(Report):
 
         localcontext['company'] = company
         localcontext['fecha'] = fecha.strftime('%d/%m/%Y')
-        localcontext['fecha_fin'] = fecha.strftime('%d/%m/%Y')
+        localcontext['fecha_fin'] = fecha_fin.strftime('%d/%m/%Y')
         localcontext['hora'] = hora.strftime('%H:%M:%S')
         localcontext['fecha_im'] = hora.strftime('%d/%m/%Y')
         localcontext['ventas_efectivo']= ventas_efectivo
@@ -607,7 +618,6 @@ class CloseCash(Report):
         #localcontext['efectivo_ingreso']=efectivo_ingreso
         #localcontext['deposito_ingreso']=deposito_ingreso
         #localcontext['total_comp_ingreso']=total_comp_ingreso
-
         localcontext['anticipos']= anticipos
         localcontext['devolucion_retencion']= devolucion_retencion
         localcontext['total_flujo']= total_flujo
@@ -629,6 +639,7 @@ class CloseCash(Report):
 class PrintSalesmanStart(ModelView):
     'Print Salesman Start'
     __name__ = 'nodux_reports.print_salesman.start'
+
     company = fields.Many2One('company.company', 'Company', required=True)
     date_start = fields.Date("Fecha Inicio", required= True)
     date_end = fields.Date("Fecha Fin", required= True)
@@ -650,7 +661,6 @@ class PrintSalesmanStart(ModelView):
         date = date.today()
         return date
 
-#crear referencias
 class PrintSalesman(Wizard):
     'Print Salesman'
     __name__ = 'nodux_reports.print_salesman'
@@ -775,6 +785,7 @@ class ReportSalesman(Report):
         localcontext['subtotal0'] = subtotal0
 
         return super(ReportSalesman, cls).parse(report, objects, data, localcontext)
+        
 
 class PrintMoveAllStart(ModelView):
     'Print Move All Start'
@@ -920,7 +931,6 @@ class ReportMoveAll(Report):
                     lineas['account'] = account.name
                     lineas['number'] = number_invoice
                     lineas['debit'] = total - iva
-
                 move_lines.append(lineas)
 
         total = ventas_efectivo
@@ -1057,6 +1067,7 @@ class ReportAccountReceivable(Report):
         total = Decimal(0.0)
         account_lineas_out_det = []
         total_out_det = Decimal(0.0)
+        total_final = Decimal(0.0)
 
         if data['clientes'] == True:
             sales = Sale.search([('sale_date', '>=', fecha), ('devolucion', '=', False), ('sale_date', '<=', fecha_fin), ('employee', '=', vendedor.id), ('state', '=', 'processing')])

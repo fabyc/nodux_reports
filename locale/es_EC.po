@@ -2,9 +2,10 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=utf-8\n"
 
+#, fuzzy
 msgctxt "field:account.cubo_venta,bodega:"
 msgid "Bodega"
-msgstr ""
+msgstr "BOD. MATRIZ"
 
 msgctxt "field:account.cubo_venta,cajas:"
 msgid "Cajas"
@@ -221,6 +222,10 @@ msgstr "ID"
 msgctxt "field:nodux_reports.print_close_cash.start,punto_venta:"
 msgid "Local"
 msgstr ""
+
+msgctxt "field:nodux_reports.print_close_cash.start,to_date:"
+msgid "To Date"
+msgstr "Fecha final"
 
 msgctxt "field:nodux_reports.print_close_cash.start,usuario:"
 msgid "Usuario"
@@ -487,7 +492,7 @@ msgid "/"
 msgstr "/"
 
 msgctxt "odt:nodux_reports.close_cash:"
-msgid "4"
+msgid "2"
 msgstr ""
 
 msgctxt "odt:nodux_reports.close_cash:"
@@ -559,8 +564,12 @@ msgid "FLUJO DE EFECTIVO"
 msgstr ""
 
 msgctxt "odt:nodux_reports.close_cash:"
-msgid "IVA"
-msgstr "Impuesto IVA ATS"
+msgid "I"
+msgstr ""
+
+msgctxt "odt:nodux_reports.close_cash:"
+msgid "MPUESTO 12%"
+msgstr ""
 
 msgctxt "odt:nodux_reports.close_cash:"
 msgid "Nodux Cía. Ltda."
@@ -832,12 +841,20 @@ msgid "]"
 msgstr "]"
 
 msgctxt "odt:nodux_reports.report_salesman:"
+msgid "%"
+msgstr "%"
+
+msgctxt "odt:nodux_reports.report_salesman:"
 msgid "-"
 msgstr "-"
 
 msgctxt "odt:nodux_reports.report_salesman:"
 msgid "/"
 msgstr "/"
+
+msgctxt "odt:nodux_reports.report_salesman:"
+msgid "2"
+msgstr ""
 
 msgctxt "odt:nodux_reports.report_salesman:"
 msgid ":"
@@ -896,7 +913,7 @@ msgid "SUBTOTAL 0%"
 msgstr ""
 
 msgctxt "odt:nodux_reports.report_salesman:"
-msgid "SUBTOTAL 14%"
+msgid "SUBTOTAL 1"
 msgstr ""
 
 msgctxt "odt:nodux_reports.report_salesman:"
